@@ -4,7 +4,7 @@ from security.config import (
     database, database_transactions, MAIN_DATABASE, limited_users, user_checks, user_invouces,
     collection_list
 )
-from utils import loggerTransactions
+from utils import loggerTransactions, loggerInvouces, loggerChecks
 
 client = AsyncIOMotorClient('127.0.0.1', 27017)
 mainClient = client['NotAwallet']
@@ -15,7 +15,7 @@ async def init():
         mainClient = client['NotAwallet']
         for collection in collection_list:
             all_db = mainClient[collection]
-            await all_db.create_index([('user_id', 1), ('wallet_address', 1)])
+            await all_db.create_index([('user_id', 1), ('wallet_address', 1), ('CHECK_ID', 1), ('INVOUCE_ID', 1)])
         print('database ok. 200.')
         return
     except:
@@ -72,7 +72,7 @@ async def main_registerTransactions(user_id: int, sum_sending: float, recipient:
         return 'SUM_ERR'
     else:
         data_UserbyWallet = await main_searchUserwallet(recipient)
-        if (data_UserbyWallet is not None) and (data_UserbyWallet is not False):
+        if (user_data is not None) and (data_UserbyWallet is not False):
             data_sendingUser = await registered_db.update_one({'user_id': user_id}, {'$inc': {'balance': -sum_sending}})
             data_recipientUser = await registered_db.update_one({'wallet_address': recipient}, {'$inc': {'balance': sum_sending}})
             data_loggedInto = await loggerTransactions.loggTransaction(wallet_from=user_data["wallet_address"], wallet_to=recipient, amount=sum_sending)
@@ -93,8 +93,34 @@ async def main_registerTransactions(user_id: int, sum_sending: float, recipient:
 async def main_limiterUser(user_id: int):
     pass
 
-async def main_registerInvoucees(user_id: int):
-    pass
+async def main_registerInvoucees(from_user_id: int, amount: float):
+    registered_db = mainClient[database]
+
+    sender_data = await main_searchUser(user_id=from_user_id)
+    if (sender_data is not None):
+        sender_balance = sender_data["balance"]
+        sender_wallet = sender_data["wallet_address"]
+        if sender_balance >= amount:
+            decr_balance = await registered_db.update_one({'user_id': from_user_id}, {'$inc': {'balance': -amount}})
+            tx_UID = await loggerInvouces.loggCheck(wallet_from=sender_wallet, amount=amount)
+            return tx_UID
+        else:
+            return 'SUM_ERR', None
+    else:
+        return 'USER_ERR', None
+
+
+
+
+async def main_handlerActivateCheck(to_user_id: int , tx_UID: str):    
+    recipient_data = await main_searchUser(user_id=to_user_id)
+    if recipient_data is not None:
+        bill_info = await loggerInvouces.loggUpdate(user_recipient_id=to_user_id, tx_UID=tx_UID)
+        if bill_info:
+            return tx_UID, bill_info, to_user_id, 2
+        else:
+            return 'ACTIVATED', None,None, 0
+
 
 async def main_registerChecks(user_id: int):
     pass

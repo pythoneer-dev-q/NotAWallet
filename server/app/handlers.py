@@ -5,7 +5,7 @@ import uvicorn
 import security.database as db
 import security.config as conf
 from utils.models import (
-    RegUser, SendToWallet
+    RegUser, SendToWallet, RegCheck, GetCheck
 )
 
 
@@ -26,9 +26,22 @@ async def main_SenderWallet(tx_user: SendToWallet):
         return jsresp({'error': loggedData, 'detail': 'см. /errs'}, 503)
     else:
         return jsresp({'status': 'Transfered', 'logged_tr': loggedData}, 200)
-
-
-
+    
+@app.post('/regCheck')
+async def main_RegisterChecks(check_user: RegCheck):
+    tx_UID, from_wallet = await db.main_registerInvoucees(check_user.user_id, check_user.amount)
+    if tx_UID in conf.errs_transactions:
+        return jsresp({'error': tx_UID, 'detail': 'см. /errs'}, 503)
+    else:
+        return jsresp({'status': 'Generated', 'tx_UID': tx_UID, 'wallet_sender': from_wallet}, 200)     
+       
+@app.post('/getCheck')
+async def main_CheckGetter(check_getter: GetCheck):
+    UID, balance, user_id, status = await db.main_handlerActivateCheck(to_user_id=check_getter.user_id_recipient, tx_UID=check_getter.tx_UID)
+    if UID in conf.errs_transactions:
+        return jsresp({'error': UID, 'detail': 'см. /errs'}, 503)
+    else:
+        return jsresp({'status': status, 'tx_UID': UID, 'after_balance': balance, 'activated_user': user_id}, 200)    
 
 @app.post('/register')
 @app.post('/reg')
