@@ -15,3 +15,11 @@ class RegCheck(BaseModel):
 class GetCheck(BaseModel):
     user_id_recipient: int
     tx_UID: str
+
+class RegInvouce(BaseModel):
+    user_id_sender: int
+    amount: float
+
+class GetInvouce(BaseModel):
+    user_id_sender: int
+    UID: str

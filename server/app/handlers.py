@@ -5,7 +5,7 @@ import uvicorn
 import security.database as db
 import security.config as conf
 from utils.models import (
-    RegUser, SendToWallet, RegCheck, GetCheck
+    RegUser, SendToWallet, RegCheck, GetCheck, RegInvouce, GetInvouce
 )
 
 
@@ -29,7 +29,7 @@ async def main_SenderWallet(tx_user: SendToWallet):
     
 @app.post('/regCheck')
 async def main_RegisterChecks(check_user: RegCheck):
-    tx_UID, from_wallet = await db.main_registerInvoucees(check_user.user_id, check_user.amount)
+    tx_UID, from_wallet = await db.main_registerCheck(check_user.user_id, check_user.amount)
     if tx_UID in conf.errs_transactions:
         return jsresp({'error': tx_UID, 'detail': 'см. /errs'}, 503)
     else:
@@ -42,6 +42,26 @@ async def main_CheckGetter(check_getter: GetCheck):
         return jsresp({'error': UID, 'detail': 'см. /errs'}, 503)
     else:
         return jsresp({'status': status, 'tx_UID': UID, 'after_balance': balance, 'activated_user': user_id}, 200)    
+
+@app.post('/regInvouce')
+async def main_InvouceRegister(invouce_sender: RegInvouce):
+    info, UID = await db.main_registerInvouces(from_user_id=invouce_sender.user_id_sender, amount=invouce_sender.amount)
+    if info in conf.errs_transactions:
+        return jsresp({'error': info, 'detail': 'см. /errs'}, 503)
+    else:
+        return jsresp({'status': 'Generated', 'invouce_UID': UID, 'user_id_sender': invouce_sender.user_id_sender}, 200)     
+
+@app.post('/getInvouce')
+async def main_invouceGetter(invouce_getter: GetInvouce):
+    doc_trn, info_payeer = await db.main_handlerInvouces(payeer_user_id=invouce_getter.user_id_sender, invouce_UID=invouce_getter.UID)
+    if doc_trn in conf.errs_transactions:
+        return jsresp({'error': doc_trn, 'detail': 'см. /errs'}, 503)
+    else:
+        return jsresp({'status': 'Paid', 'transaction_doc': doc_trn, 'user_payeer_info': info_payeer}, 200)     
+
+
+
+
 
 @app.post('/register')
 @app.post('/reg')

@@ -1,34 +1,50 @@
 from motor.motor_asyncio import AsyncIOMotorClient
-from security.config import user_invouces, database
-import uuid
+from security.config import database, user_invouces
+from utils import loggerTransactions
+from uuid import uuid4
+
 
 client = AsyncIOMotorClient('127.0.0.1', 27017)
 mainClient = client['NotAwallet']
 lgg_dbs = mainClient[user_invouces]
 main_db = mainClient[database]
 
-async def loggCheck(wallet_from: str, amount: float):
-    UID_TRSCTN = f'{uuid.uuid4()}CHECK{uuid.uuid4()}'
-    trsctn_doc = {
-        'wallet_from': wallet_from,
+async def main_RegisterInvouce(user_id: int, amount: float):
+    UID_invouce = f'INVC{uuid4()}'
+    trnsctn_doc = {
+        'user_id': user_id,
         'amount': amount,
-        'CHECK_ID': UID_TRSCTN, 
+        'UID': UID_invouce,
         'status': 1
     }
-    check_row = await lgg_dbs.insert_one(trsctn_doc)
-    trsctn_doc["_id"] = str(trsctn_doc['_id'])
-    return trsctn_doc["CHECK_ID"], trsctn_doc["wallet_from"]
+    insert_inf = await lgg_dbs.insert_one(trnsctn_doc)
 
-async def loggUpdate(user_recipient_id: int, tx_UID: str):
-    transaction_dataByID = await lgg_dbs.find_one({'CHECK_ID': tx_UID})
-    if transaction_dataByID and transaction_dataByID["status"] == 1:
-        amount_to_add = transaction_dataByID["amount"]
-        await lgg_dbs.update_one({'CHECK_ID': tx_UID}, {'$set': {'status': 2}})
+    trnsctn_doc['_id'] = str(trnsctn_doc['_id'])
+    return trnsctn_doc, UID_invouce
 
-        adding_userRecipient = await main_db.update_one({'user_id': user_recipient_id}, {'$inc': {'balance': amount_to_add}})
-        user_recipientBalance =await  main_db.find_one({'user_id': user_recipient_id})
-        user_recipientBalance["_id"] = str(user_recipientBalance['_id'])
 
-        return user_recipientBalance["balance"]
+async def main_invouceHandler(payeer_user_id: int, amount: float, invouce_UID: str):
+    invouce_data = await lgg_dbs.find_one({'UID': invouce_UID})
+    payeer_data = await main_db.find_one({'user_id': payeer_user_id})
+    recipient_data = await main_db.find_one({'user_id': invouce_data['user_id']})
+
+    if (invouce_data) and (invouce_data["status"] == 1):
+        user_decrBalance = await main_db.update_one({'user_id': payeer_user_id}, {'$inc': {'balance': -amount}})
+        user_updBalance = await main_db.update_one({'user_id': invouce_data['user_id']}, {'$inc': {'balance': amount}})
+        update_invouceBalance = await lgg_dbs.update_one({'UID': invouce_UID}, {'$set': {'status': 2}})
+
+        main_doc = await loggerTransactions.loggTransaction(wallet_from=payeer_data['wallet_address'], wallet_to=recipient_data['wallet_address'], amount=amount)
+        if main_doc:
+            return main_doc, payeer_data
+        else:
+            return 'SRVR_ERR', None
     else:
-        return 0
+        return 'ACTIVATED', None
+    
+
+async def main_validateInvouce(invouce_UID: str):
+    invouce_data = await lgg_dbs.find_one({'UID': invouce_UID})
+    if invouce_data:
+        return invouce_data
+    else:
+        return None

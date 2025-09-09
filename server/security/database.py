@@ -4,7 +4,8 @@ from security.config import (
     database, database_transactions, MAIN_DATABASE, limited_users, user_checks, user_invouces,
     collection_list
 )
-from utils import loggerTransactions, loggerInvouces, loggerChecks
+from utils import loggerCheck, loggerInvouces
+from utils import loggerTransactions
 
 client = AsyncIOMotorClient('127.0.0.1', 27017)
 mainClient = client['NotAwallet']
@@ -93,7 +94,7 @@ async def main_registerTransactions(user_id: int, sum_sending: float, recipient:
 async def main_limiterUser(user_id: int):
     pass
 
-async def main_registerInvoucees(from_user_id: int, amount: float):
+async def main_registerCheck(from_user_id: int, amount: float):
     registered_db = mainClient[database]
 
     sender_data = await main_searchUser(user_id=from_user_id)
@@ -102,7 +103,7 @@ async def main_registerInvoucees(from_user_id: int, amount: float):
         sender_wallet = sender_data["wallet_address"]
         if sender_balance >= amount:
             decr_balance = await registered_db.update_one({'user_id': from_user_id}, {'$inc': {'balance': -amount}})
-            tx_UID = await loggerInvouces.loggCheck(wallet_from=sender_wallet, amount=amount)
+            tx_UID = await loggerCheck.loggCheck(wallet_from=sender_wallet, amount=amount)
             return tx_UID
         else:
             return 'SUM_ERR', None
@@ -115,12 +116,37 @@ async def main_registerInvoucees(from_user_id: int, amount: float):
 async def main_handlerActivateCheck(to_user_id: int , tx_UID: str):    
     recipient_data = await main_searchUser(user_id=to_user_id)
     if recipient_data is not None:
-        bill_info = await loggerInvouces.loggUpdate(user_recipient_id=to_user_id, tx_UID=tx_UID)
+        bill_info = await loggerCheck.loggUpdate(user_recipient_id=to_user_id, tx_UID=tx_UID)
         if bill_info:
             return tx_UID, bill_info, to_user_id, 2
         else:
-            return 'ACTIVATED', None,None, 0
+            return 'ACTIVATED', None, None, 0
 
 
-async def main_registerChecks(user_id: int):
-    pass
+async def main_registerInvouces(from_user_id: int, amount: float):
+    sender_data = await main_searchUser(user_id=from_user_id)
+    if sender_data is not None:
+        invouce_info, UID = await loggerInvouces.main_RegisterInvouce(user_id=from_user_id, amount=amount)
+        if (invouce_info is not None) and (UID is not None):
+            return invouce_info, UID
+        else:
+            return 'SRVR_ERR', None
+    else:
+        return 'WLT_NT_EXST', None
+    
+async def main_handlerInvouces(payeer_user_id: int, invouce_UID: str):
+    invouce_data = await loggerInvouces.main_validateInvouce(invouce_UID=invouce_UID)
+    user_data = await main_searchUser(user_id=payeer_user_id)
+    if (invouce_data is not None) and (user_data is not None):
+        if invouce_data['amount'] <= user_data['balance']:
+            document_trn, user_info = await loggerInvouces.main_invouceHandler(payeer_user_id=payeer_user_id, amount=invouce_data['amount'], invouce_UID=invouce_UID)
+            if document_trn and user_info:
+                user_info['_id'] = str(user_info['_id'])
+                return document_trn, user_info
+            else:
+                return 'SRVR_ERR', None
+        
+        else:
+            return 'SUM_ERR', None
+    else:
+        return 'SRVR_ERR', None
