@@ -17,6 +17,11 @@ async def init():
         for collection in collection_list:
             all_db = mainClient[collection]
             await all_db.create_index([('user_id', 1), ('wallet_address', 1), ('CHECK_ID', 1), ('INVOUCE_ID', 1)])
+        else:
+            api_db = mainClient['API_KEY']
+            delete_prevKey = await api_db.delete_many({})
+            new_apiKey = f'APISession-{uuid4()}'
+            add_new_key = await api_db.insert_one({'temp_key': new_apiKey})
         print('database ok. 200.')
         return
     except:

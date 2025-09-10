@@ -67,7 +67,7 @@ async def main_invouceGetter(invouce_getter: GetInvouce):
 @app.post('/reg')
 async def main_registerUser(user: RegUser, request: Request):
     user_id = user.user_id
-    reg_doc = await db.main_registerUser(user_id, meta=request.headers)
+    reg_doc = await db.main_registerUser(int(user_id), meta=request.headers)
     if  reg_doc is not None:
         return reg_doc
     else:

@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
 class RegUser(BaseModel):
-    user_id: int
+    user_id: str
 
 class SendToWallet(BaseModel):
     user_id: int
