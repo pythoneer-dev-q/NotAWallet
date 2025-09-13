@@ -438,7 +438,7 @@ function App() {
             <div>
               <div className="flex items-center space-x-3 mb-6">
                 <img
-                  src="/photo_2025-09-07_01-32-44-no-bg-preview (carve.photos).png"
+                  src="naw.png"
                   alt="NAW Logo"
                   className="h-8 w-8"
                 />
