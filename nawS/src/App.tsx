@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import {
   Menu,
   X,
@@ -8,9 +8,7 @@ import {
   ArrowRight,
   Check,
   Star,
-  Download,
   Smartphone,
-  Monitor,
   Lock,
   TrendingUp,
   Users,
@@ -20,62 +18,6 @@ import {
 function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeFeature, setActiveFeature] = useState(0);
-  const [user, setUser] = useState<any>(null);
-
-  useEffect(() => {
-    const saved = localStorage.getItem('tg_user');
-    if (saved) setUser(JSON.parse(saved));
-  }, []);
-
-  const handleTelegramLogin = () => {
-    const scriptId = 'telegram-login-widget';
-    if (!document.getElementById(scriptId)) {
-      const s = document.createElement('script');
-      s.src = 'https://telegram.org/js/telegram-widget.js?22';
-      s.async = true;
-      s.id = scriptId;
-      document.body.appendChild(s);
-      s.onload = () => startAuth();
-    } else {
-      startAuth();
-    }
-
-    function startAuth() {
-      const botIdRaw = import.meta.env.VITE_TELEGRAM_BOT_ID;
-      const botIdStr = (botIdRaw ?? '').toString().trim().replace(/^"|"$/g, '');
-      const botId = parseInt(botIdStr, 10);
-      if (!botIdStr || Number.isNaN(botId)) {
-        alert('Не задан VITE_TELEGRAM_BOT_ID');
-        return;
-      }
-      window.Telegram?.Login?.auth({
-        bot_id: botId,
-        request_access: 'write'
-      }, async (data: any) => {
-        try {
-          const res = await fetch('/api/auth/telegram', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-          });
-          const json = await res.json();
-          if (json.ok) {
-            setUser(json.user);
-            localStorage.setItem('tg_user', JSON.stringify(json.user));
-          } else {
-            alert('Ошибка входа: ' + json.error);
-          }
-        } catch (e) {
-          alert('Сервер недоступен');
-        }
-      });
-    }
-  };
-
-  const handleLogout = () => {
-    setUser(null);
-    localStorage.removeItem('tg_user');
-  };
 
   const features = [
     {
@@ -133,21 +75,9 @@ function App() {
             </nav>
 
             <div className="hidden md:flex space-x-4">
-              {user ? (
-                <div className="flex items-center space-x-3">
-                  {user.photo_url && (
-                    <img src={user.photo_url} alt="avatar" className="w-8 h-8 rounded-full" />
-                  )}
-                  <span className="text-gray-700">{user.first_name}</span>
-                  <button onClick={handleLogout} className="px-3 py-1 text-gray-600 hover:bg-gray-100 rounded-lg">Выйти</button>
-                </div>
-              ) : (
-                <>
-                  <button onClick={handleTelegramLogin} className="px-4 py-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors">
-                    Войти через Telegram
-                  </button>
-                </>
-              )}
+              <button className="px-4 py-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors">
+                Создать кошелек
+              </button>
             </div>
 
             <button
@@ -167,23 +97,9 @@ function App() {
               <a href="#supported" className="block text-gray-700 hover:text-purple-600">Криптовалюты</a>
               <a href="#download" className="block text-gray-700 hover:text-purple-600">Скачать</a>
               <div className="flex flex-col space-y-2 pt-4 border-t">
-                {user ? (
-                  <>
-                    <div className="flex items-center space-x-3">
-                      {user.photo_url && (
-                        <img src={user.photo_url} alt="avatar" className="w-8 h-8 rounded-full" />
-                      )}
-                      <span className="text-gray-700">{user.first_name}</span>
-                    </div>
-                    <button onClick={handleLogout} className="px-4 py-2 text-gray-600 border border-gray-200 rounded-lg">Выйти</button>
-                  </>
-                ) : (
-                  <>
-                    <button onClick={handleTelegramLogin} className="px-4 py-2 text-purple-600 border border-purple-200 rounded-lg">
-                      Войти через Telegram
-                    </button>
-                  </>
-                )}
+                <button className="px-4 py-2 text-purple-600 border border-purple-200 rounded-lg">
+                  Создать кошелек
+                </button>
               </div>
             </nav>
           </div>
@@ -210,10 +126,10 @@ function App() {
                 цифровыми активами. Более 1 миллиона пользователей уже доверяют нам.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                <button onClick={handleTelegramLogin} className="group px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-500 text-white rounded-lg hover:shadow-xl transform hover:-translate-y-1 transition-all text-lg font-semibold">
+                <a href="https://t.me/nawcryptotextbot"><button className="group px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-500 text-white rounded-lg hover:shadow-xl transform hover:-translate-y-1 transition-all text-lg font-semibold">
                   Создать кошелек бесплатно
                   <ArrowRight className="inline ml-2 group-hover:translate-x-1 transition-transform" size={20} />
-                </button>
+                </button></a>
               </div>
               <div className="flex items-center justify-center lg:justify-start mt-8 space-x-6 text-sm text-gray-500">
                 <div className="flex items-center space-x-2">
@@ -253,7 +169,7 @@ function App() {
                     </div>
 
                     <div className="space-y-3">
-                      {cryptocurrencies.slice(0, 3).map((crypto, index) => (
+                      {cryptocurrencies.slice(0, 3).map((crypto) => (
                         <div key={crypto.symbol} className="flex items-center justify-between bg-gray-50 rounded-xl p-3">
                           <div className="flex items-center space-x-3">
                             <div className={`w-8 h-8 rounded-full bg-gradient-to-r ${crypto.color}`}></div>
@@ -453,7 +369,7 @@ function App() {
           </div>
 
           <div className="grid md:grid-cols-3 lg:grid-cols-6 gap-6">
-            {cryptocurrencies.map((crypto, index) => (
+            {cryptocurrencies.map((crypto) => (
               <div
                 key={crypto.symbol}
                 className="group p-6 bg-gray-50 rounded-2xl hover:bg-white hover:shadow-lg transition-all cursor-pointer"
@@ -471,7 +387,7 @@ function App() {
             <p className="text-gray-600 text-lg mb-6">
               И еще более 100 криптовалют и токенов
             </p>
-            <button onClick={handleTelegramLogin} className="px-8 py-3 bg-gradient-to-r from-purple-600 to-blue-500 text-white rounded-lg hover:shadow-lg transform hover:-translate-y-0.5 transition-all">
+            <button className="px-8 py-3 bg-gradient-to-r from-purple-600 to-blue-500 text-white rounded-lg hover:shadow-lg transform hover:-translate-y-0.5 transition-all">
               Посмотреть полный список
             </button>
           </div>
@@ -485,18 +401,17 @@ function App() {
               Начните управлять криптовалютами уже сегодня
             </h2>
             <p className="text-xl text-purple-100 mb-12 max-w-3xl mx-auto">
-              Переходите в Бот NAW
+              Скачайте приложение и начните управлять криптовалютами уже сегодня
             </p>
 
             <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-12">
-              <button onClick={handleTelegramLogin} className="group flex items-center space-x-3 bg-black text-white px-8 py-4 rounded-2xl hover:bg-gray-800 transition-colors">
+              <button className="group flex items-center space-x-3 bg-black text-white px-8 py-4 rounded-2xl hover:bg-gray-800 transition-colors">
                 <Smartphone size={24} />
                 <div className="text-left">
-                  <div className="text-xs text-gray-300">Перейти в бота</div>
-                  <div className="text-lg font-semibold">Telegram</div>
+                  <div className="text-xs text-gray-300">Скачать приложение</div>
+                  <div className="text-lg font-semibold">NAW Wallet</div>
                 </div>
               </button>
-
             </div>
 
             <div className="grid md:grid-cols-3 gap-8 text-center">
