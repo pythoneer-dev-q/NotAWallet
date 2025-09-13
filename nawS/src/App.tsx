@@ -63,7 +63,7 @@ function App() {
                 className="h-10 w-10"
               />
               <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent">
-                NAW Wallet
+                Not A Wallet
               </span>
             </div>
 
@@ -71,12 +71,12 @@ function App() {
               <a href="#features" className="text-gray-700 hover:text-purple-600 transition-colors">Возможности</a>
               <a href="#security" className="text-gray-700 hover:text-purple-600 transition-colors">Безопасность</a>
               <a href="#supported" className="text-gray-700 hover:text-purple-600 transition-colors">Криптовалюты</a>
-              <a href="#download" className="text-gray-700 hover:text-purple-600 transition-colors">Скачать</a>
+              <a href="#download" className="text-gray-700 hover:text-purple-600 transition-colors">Перейти в бота</a>
             </nav>
 
             <div className="hidden md:flex space-x-4">
               <button className="px-4 py-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors">
-                Создать кошелек
+                Посмотреть демо
               </button>
             </div>
 
@@ -95,10 +95,10 @@ function App() {
               <a href="#features" className="block text-gray-700 hover:text-purple-600">Возможности</a>
               <a href="#security" className="block text-gray-700 hover:text-purple-600">Безопасность</a>
               <a href="#supported" className="block text-gray-700 hover:text-purple-600">Криптовалюты</a>
-              <a href="#download" className="block text-gray-700 hover:text-purple-600">Скачать</a>
+              <a href="#download" className="block text-gray-700 hover:text-purple-600">Перейти в бота</a>
               <div className="flex flex-col space-y-2 pt-4 border-t">
                 <button className="px-4 py-2 text-purple-600 border border-purple-200 rounded-lg">
-                  Создать кошелек
+                  Посмотреть демо
                 </button>
               </div>
             </nav>
@@ -115,7 +115,9 @@ function App() {
                   Будущее
                 </span>
                 <br />
-                криптовалют
+                <span className="bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent">
+                  криптовалют
+                </span>
                 <br />
                 <span className="bg-gradient-to-r from-blue-500 to-cyan-400 bg-clip-text text-transparent">
                   в ваших руках
@@ -153,7 +155,7 @@ function App() {
                   <div className="bg-white rounded-3xl p-6 h-full relative overflow-hidden">
                     <div className="text-center mb-6">
                       <img
-                        src="/photo_2025-09-07_01-32-44-no-bg-preview (carve.photos).png"
+                        src="naw.png"
                         alt="NAW Logo"
                         className="h-12 w-12 mx-auto mb-2"
                       />
@@ -408,8 +410,8 @@ function App() {
               <button className="group flex items-center space-x-3 bg-black text-white px-8 py-4 rounded-2xl hover:bg-gray-800 transition-colors">
                 <Smartphone size={24} />
                 <div className="text-left">
-                  <div className="text-xs text-gray-300">Скачать приложение</div>
-                  <div className="text-lg font-semibold">NAW Wallet</div>
+                  <div className="text-xs text-gray-300">Перейти в NAW</div>
+                  <div className="text-lg font-semibold">Telegram</div>
                 </div>
               </button>
             </div>
@@ -440,7 +442,7 @@ function App() {
                   alt="NAW Logo"
                   className="h-8 w-8"
                 />
-                <span className="text-xl font-bold">NAW Wallet</span>
+                <span className="text-xl font-bold">NAW</span>
               </div>
               <p className="text-gray-400 mb-6">
                 Безопасный и удобный кошелек для управления криптовалютами нового поколения.
@@ -483,8 +485,6 @@ function App() {
               <div className="space-y-3">
                 <a href="#" className="block text-gray-400 hover:text-white transition-colors">О нас</a>
                 <a href="#" className="block text-gray-400 hover:text-white transition-colors">Блог</a>
-                <a href="#" className="block text-gray-400 hover:text-white transition-colors">Карьера</a>
-                <a href="#" className="block text-gray-400 hover:text-white transition-colors">Пресса</a>
               </div>
             </div>
           </div>
@@ -497,7 +497,6 @@ function App() {
               <div className="flex space-x-6 text-sm text-gray-400 mt-4 md:mt-0">
                 <a href="#" className="hover:text-white transition-colors">Политика конфиденциальности</a>
                 <a href="#" className="hover:text-white transition-colors">Условия использования</a>
-                <a href="#" className="hover:text-white transition-colors">Cookies</a>
               </div>
             </div>
           </div>
