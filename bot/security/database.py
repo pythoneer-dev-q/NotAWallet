@@ -23,7 +23,7 @@ async def main_registerUser(user_id: int, lang: str = 'ru'):
             bot_doc = {
                 'user_id': user_id,
                 'status': 'active',
-                'block_info': main_doc,
+                'wallet_address': main_doc['wallet_address'],
                 'node': '',
                 'lang': f'{lang}'
             }

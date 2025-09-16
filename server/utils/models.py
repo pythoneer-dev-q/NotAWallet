@@ -23,3 +23,6 @@ class RegInvouce(BaseModel):
 class GetInvouce(BaseModel):
     user_id_sender: int
     UID: str
+    
+class SearchUser(BaseModel):
+    user_id: int

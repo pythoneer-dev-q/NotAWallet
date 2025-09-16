@@ -32,7 +32,7 @@ async def init():
 async def main_searchUser(user_id: int):
     registered_db = mainClient[database]
     pattern = {'user_id': user_id}
-    user_byId = await registered_db.find_one(pattern)
+    user_byId = await registered_db.find_one(pattern, projection={'_id': False})
     if user_byId is not None:
         return user_byId
     else:

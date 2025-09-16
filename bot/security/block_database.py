@@ -21,3 +21,17 @@ async def main_GetWalletUser(user_id: int):
                     return None
             else:
                 return None
+            
+async def main_searchUser(user_id: int):
+    async with aiohttp.ClientSession() as session:
+        async with session.post(f'{database_config.API_URI}/search', json={
+            'user_id': f'{user_id}'
+        }) as response:
+            data = await response.json()
+            if data:
+                if data.get('wallet_address', None):
+                    return data
+                else:
+                    return None
+            else:
+                return None

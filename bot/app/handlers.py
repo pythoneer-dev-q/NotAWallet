@@ -5,7 +5,7 @@ from aiogram.fsm.context import FSMContext
 import security.database as main_db
 import app.keyboards as kb
 from asyncio import sleep
-from utils import getLang
+from utils import getLang, sort_user_data
 from utils.messages import (
     RuMessages, CnMessages, EnMessages
 )
@@ -21,16 +21,15 @@ async def main_startRegister(message: Message):
     user_data = await main_db.main_searchUser(user_id=user_id)
 
     if user_data is not None:
-        wallet_doc = user_data.get('block_info', '')
-        wallet_num = wallet_doc.get('wallet_address', '')
+        wallet_num = user_data.get('wallet_address', '')
         if user_data['lang'] == 'ru':
-            await message.answer(f'{RuMessages.welcome_message}\n<b>Ваш кошелек</b>: <code>{wallet_num}</code>', reply_markup=kb.main_markup(lang=user_data['lang']))
+            await message.answer(f'{RuMessages.welcome_message}\n\n<b>Ваш кошелек</b>: <code>{wallet_num}</code>', reply_markup=await kb.main_markup(lang=user_data['lang']))
             return
         elif user_data['lang'] == 'en':
-            await message.answer(text=f'{EnMessages.welcome_message}\n<b>Your wallet</b>: <code>{wallet_num}</code>', reply_markup=await kb.main_markup(lang='en'))
+            await message.answer(text=f'{EnMessages.welcome_message}\n\n<b>Your wallet</b>: <code>{wallet_num}</code>', reply_markup=await kb.main_markup(lang='en'))
             return
         elif user_data['lang'] == 'cn':
-            await message.answer(text=f'{CnMessages.welcome_message}\n<b>Your wallet</b>: <code>{wallet_num}</code>', reply_markup=await kb.main_markup(lang='cn'))
+            await message.answer(text=f'{CnMessages.welcome_message}\n\n<b>Your wallet</b>: <code>{wallet_num}</code>', reply_markup=await kb.main_markup(lang='cn'))
             return
     else:
         await message.answer('Please, choose your language below:', reply_markup=await kb.main_registerMarkup())
@@ -87,7 +86,7 @@ async def main_completeRegister(call: CallbackQuery):
             await progress_message.edit_text(f'an error has occured.')
 
 
-
+@router.callback_query(F.data == 'back_settings')
 @router.callback_query(F.data == 'settings')
 async def main_settingsLister(call: CallbackQuery):
     user_id = call.from_user.id
@@ -103,6 +102,6 @@ async def main_settingsLister(call: CallbackQuery):
 async def main_identy(call: CallbackQuery):
     user_id = call.from_user.id
     user_data = await main_db.main_searchUser(user_id=user_id)
-    user_append_if = []
     lang = await getLang.main_getLang(user_id=user_id)
-    await call.message.edit_text(f'<code>{user_data}</code>')
+    message_text = await sort_user_data.main_sortuserData(lang=lang, user_data=user_data)
+    await call.message.edit_text(message_text, reply_markup=await kb.main_backSettings())

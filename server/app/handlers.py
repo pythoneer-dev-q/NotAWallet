@@ -5,7 +5,7 @@ import uvicorn
 import security.database as db
 import security.config as conf
 from utils.models import (
-    RegUser, SendToWallet, RegCheck, GetCheck, RegInvouce, GetInvouce
+    RegUser, SendToWallet, RegCheck, GetCheck, RegInvouce, GetInvouce, SearchUser
 )
 
 
@@ -18,6 +18,16 @@ async def main_helloWorld():
         'detail': 'OK.',
         'time': f'{time.time()}'
     })
+@app.post('/search')
+async def main_searchuserData(user_insertData: SearchUser):
+    user_walletData = await db.main_searchUser(user_id=user_insertData.user_id)
+    if user_insertData is not None:
+        return jsresp(content=user_walletData, status_code=200)
+    else:
+        return jsresp(content={
+            'status': 'error',
+            'detail': 'not found'
+        }, status_code=404)
 
 @app.post('/send')
 async def main_SenderWallet(tx_user: SendToWallet):

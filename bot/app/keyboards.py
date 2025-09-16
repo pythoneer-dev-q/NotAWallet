@@ -67,8 +67,8 @@ async def settings_markup(lang: str):
     ]
             ])
         return keyboard
-async def main_backMenu():
+async def main_backSettings():
     keyboard = kb_mrk(inline_keyboard=[[
-         kb_btn(text='<<', callback_data='back_menu')
+         kb_btn(text='<<', callback_data='back_settings')
     ]])
     return keyboard
