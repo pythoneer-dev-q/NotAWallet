@@ -72,3 +72,19 @@ async def main_backSettings():
          kb_btn(text='<<', callback_data='back_settings')
     ]])
     return keyboard
+
+async def main_payInvouce(invouce_amount: float, invouce_uid: str):
+    keyboard = kb_mrk(inline_keyboard=[[
+         kb_btn(text=f'💳 Оплатить {invouce_amount}', url=f'https://t.me/ntwlt_bot?start=inv{invouce_uid}'),
+         kb_btn(text='❌ Отказаться', callback_data=f'delete:invouce:{invouce_uid}')
+    ]])
+    return keyboard
+
+async def proceed_invouce(amount: int):
+    keyboard = kb_mrk(inline_keyboard=[[kb_btn(
+                    text="Начать создание",
+                    callback_data=f"start_invoice:{amount}"
+                )]
+            ]
+        )
+    return keyboard

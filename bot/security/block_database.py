@@ -35,3 +35,22 @@ async def main_searchUser(user_id: int):
                     return None
             else:
                 return None
+            
+async def main_generateInvouce(from_user_id: int, amount: int):
+    async with aiohttp.ClientSession() as session:
+        async with session.post(f'{database_config.API_URI}/regInvouce', json={
+            'user_id_sender': from_user_id,
+            'amount': amount
+        }) as response:
+            data = await response.json()
+            if data is not None:
+                if data.get('status', '').lower() == 'generated':
+                    uid = data.get('invouce_UID', '')
+                    from_user = data.get('user_id_sender', '')
+                    return uid, from_user
+                else:
+                    return None, None
+            else:
+                return None, None
+async def main_deleteInvouce():
+    pass

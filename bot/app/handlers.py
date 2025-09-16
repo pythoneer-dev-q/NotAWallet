@@ -11,9 +11,19 @@ from utils.messages import (
 )
 router = Router()
 
+from aiogram import Router
+from aiogram.filters import CommandStart
+from aiogram.types import Message
+
+router = Router()
+
 @router.message(CommandStart(deep_link=True))
 async def main_starterLinker(message: Message, command: CommandStart):
-    pass
+    args = command.args or ""
+
+    if args.startswith('inv'):
+        await message.answer(f'Отловил твой счет:\nUID: {args}')
+
 
 @router.message(CommandStart(deep_link=False))
 async def main_startRegister(message: Message):
