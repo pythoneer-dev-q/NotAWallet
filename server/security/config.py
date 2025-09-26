@@ -12,4 +12,4 @@ user_checks = 'not_usersChecks'
 collection_list = [database, database_transactions, limited_users, user_invouces, user_checks]
 
 # --- errs --- #
-errs_transactions = ['SUM_ERR', 'SRVR_ERR', 'WLT_NT_EXST', 'ACTIVATED', 'USER_ERR']
+errs_transactions = ['SUM_ERR', 'SRVR_ERR', 'WLT_NT_EXST','INV_NT_EXST','ACTIVATED', 'USER_ERR', 'RESCTRICTED']

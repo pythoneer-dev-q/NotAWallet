@@ -5,7 +5,7 @@ import uvicorn
 import security.database as db
 import security.config as conf
 from utils.models import (
-    RegUser, SendToWallet, RegCheck, GetCheck, RegInvouce, GetInvouce, SearchUser
+    RegUser, SendToWallet, RegCheck, GetCheck, RegInvouce, GetInvouce, SearchUser, DeleteInvouce
 )
 
 
@@ -67,8 +67,15 @@ async def main_invouceGetter(invouce_getter: GetInvouce):
     if doc_trn in conf.errs_transactions:
         return jsresp({'error': doc_trn, 'detail': 'см. /errs'}, 503)
     else:
-        return jsresp({'status': 'Paid', 'transaction_doc': doc_trn, 'user_payeer_info': info_payeer}, 200)     
-
+        return jsresp({'status': 'Paid', 'transaction_doc': doc_trn, 'user_payeer_info': info_payeer}, 200) 
+        
+@app.post('/deleteInvouce')
+async def main_invouceDeleter(invouce_deleterData: DeleteInvouce):
+    data = await db.main_deleterInvouce(user_idCreator=invouce_deleterData.user_id, invouce_UID=invouce_deleterData.UID)
+    if data in conf.errs_transactions:
+        return jsresp({'error': data, 'detail': 'см. /errs'}, 503)
+    else:
+        return jsresp({'status': 'deleted', 'transaction_doc': data}, 200)     
 
 
 

@@ -8,7 +8,7 @@ lgg_dbs = mainClient[user_checks]
 main_db = mainClient[database]
 
 async def loggCheck(wallet_from: str, amount: float):
-    UID_TRSCTN = f'{uuid.uuid4()}CHECK{uuid.uuid4()}'
+    UID_TRSCTN = f'CHECK{uuid.uuid4()}'
     trsctn_doc = {
         'wallet_from': wallet_from,
         'amount': amount,

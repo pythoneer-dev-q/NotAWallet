@@ -26,3 +26,7 @@ class GetInvouce(BaseModel):
     
 class SearchUser(BaseModel):
     user_id: int
+
+class DeleteInvouce(BaseModel):
+    user_id: int
+    UID: str

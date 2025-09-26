@@ -88,3 +88,18 @@ async def proceed_invouce(amount: int):
             ]
         )
     return keyboard
+
+async def proceed_check(amount: int):
+    keyboard = kb_mrk(inline_keyboard=[[kb_btn(
+                    text="Создать чек",
+                    callback_data=f"start_check:{amount}"
+                )]
+            ]
+        )
+    return keyboard
+async def main_getCheck(check_amount: float, check_uid: str):
+    keyboard = kb_mrk(inline_keyboard=[[
+         kb_btn(text=f'💳 Получить {check_amount}', url=f'https://t.me/ntwlt_bot?start=chk{check_uid}'),
+         kb_btn(text='❌ Отказаться', callback_data=f'delete:check:{check_uid}')
+    ]])
+    return keyboard

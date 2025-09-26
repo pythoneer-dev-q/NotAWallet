@@ -16,7 +16,7 @@ async def init():
         mainClient = client['NotAwallet']
         for collection in collection_list:
             all_db = mainClient[collection]
-            await all_db.create_index([('user_id', 1), ('wallet_address', 1), ('CHECK_ID', 1), ('INVOUCE_ID', 1)])
+            await all_db.create_index([('user_id', 1), ('wallet_address', 1), ('CHECK_ID', 1), ('UID', 1)])
         else:
             api_db = mainClient['API_KEY']
             delete_prevKey = await api_db.delete_many({})
@@ -146,7 +146,6 @@ async def main_handlerInvouces(payeer_user_id: int, invouce_UID: str):
         if invouce_data['amount'] <= user_data['balance']:
             document_trn, user_info = await loggerInvouces.main_invouceHandler(payeer_user_id=payeer_user_id, amount=invouce_data['amount'], invouce_UID=invouce_UID)
             if document_trn and user_info:
-                user_info['_id'] = str(user_info['_id'])
                 return document_trn, user_info
             else:
                 return 'SRVR_ERR', None
@@ -155,3 +154,16 @@ async def main_handlerInvouces(payeer_user_id: int, invouce_UID: str):
             return 'SUM_ERR', None
     else:
         return 'SRVR_ERR', None
+
+async def main_deleterInvouce(user_idCreator: int, invouce_UID: str):
+    invouce_data = await loggerInvouces.main_validateInvouce(invouce_UID=invouce_UID)
+    if invouce_data:
+        if (invouce_data['user_id'] is not None) and (invouce_data['user_id'] == user_idCreator):
+            if await loggerInvouces.main_deleteInvouce(invouce_UID=invouce_UID) is True:
+                return invouce_data
+            else:
+                return 'SRVR_ERR'
+        else: 
+            return 'RESCTRICTED'
+    else:
+        return 'INV_NT_EXST'

@@ -43,8 +43,13 @@ async def main_invouceHandler(payeer_user_id: int, amount: float, invouce_UID: s
     
 
 async def main_validateInvouce(invouce_UID: str):
-    invouce_data = await lgg_dbs.find_one({'UID': invouce_UID})
+    invouce_data = await lgg_dbs.find_one({'UID': invouce_UID}, projection={'_id': False})
     if invouce_data:
         return invouce_data
+    else:
+        return None
+async def main_deleteInvouce(invouce_UID: str):
+    if await lgg_dbs.find_one_and_delete({'UID': invouce_UID}):
+        return True
     else:
         return None

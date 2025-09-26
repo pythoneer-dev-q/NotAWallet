@@ -52,5 +52,39 @@ async def main_generateInvouce(from_user_id: int, amount: int):
                     return None, None
             else:
                 return None, None
-async def main_deleteInvouce():
-    pass
+async def main_deleteInvouce(clicked_user_id: int, invouce_UID: str):
+    async with aiohttp.ClientSession() as session:
+        async with session.post(f'{database_config.API_URI}/deleteInvouce', json={
+            'user_id': clicked_user_id,
+            'UID': invouce_UID
+        }) as response:
+            data = await response.json()
+            if data is not None:
+                if data.get('status', '').lower() == 'deleted':
+                    amount = data['transaction_doc']['amount']
+                    from_user = data['transaction_doc']['user_id']
+                    status = 'finished' if data['transaction_doc']['status'] == 2 else 'not_finished'
+                    return status, from_user, amount
+                else:
+                    return None, None, None
+            else:
+                return None, None, None
+
+
+
+async def main_generateCheck(from_user_id: int, amount: int):
+    async with aiohttp.ClientSession() as session:
+        async with session.post(f'{database_config.API_URI}/regCheck', json={
+            'user_id': from_user_id,
+            'amount': amount
+        }) as response:
+            data = await response.json()
+            if data is not None:
+                if data.get('status', '').lower() == 'generated':
+                    tx_uid = data['tx_UID']
+                    from_user_wallet = data['wallet_sender']
+                    return tx_uid, from_user_wallet, amount
+                else:
+                    return None, None, None
+            else:
+                return None, None, None
