@@ -1,5 +1,6 @@
 from aiogram.types import InlineKeyboardButton as kb_btn
 from aiogram.types import InlineKeyboardMarkup as kb_mrk
+from config.main_cofig import server_URI
 
 async def main_registerMarkup():
             keyboard = kb_mrk(inline_keyboard=[[
@@ -77,7 +78,8 @@ async def main_payInvouce(invouce_amount: float, invouce_uid: str):
     keyboard = kb_mrk(inline_keyboard=[[
          kb_btn(text=f'💳 Оплатить {invouce_amount}', url=f'https://t.me/ntwlt_bot?start=inv{invouce_uid}'),
          kb_btn(text='❌ Отказаться', callback_data=f'delete:invouce:{invouce_uid}')
-    ]])
+    ],
+         [kb_btn(text='❔ Посмотреть в Explorer', url=f'{server_URI}/server/invoice/{invouce_uid}')]])
     return keyboard
 
 async def proceed_invouce(amount: int):
@@ -100,6 +102,21 @@ async def proceed_check(amount: int):
 async def main_getCheck(check_amount: float, check_uid: str):
     keyboard = kb_mrk(inline_keyboard=[[
          kb_btn(text=f'💳 Получить {check_amount}', url=f'https://t.me/ntwlt_bot?start=chk{check_uid}'),
-         kb_btn(text='❌ Отказаться', callback_data=f'delete:check:{check_uid}')
-    ]])
+         kb_btn(text='❌ Отказаться', callback_data=f'delete:check:{check_uid}')],
+         [kb_btn(text='❔ Посмотреть в Explorer', url=f'{server_URI}/server/check/{check_uid}')]])
+    return keyboard
+
+async def main_deletedCheckKb(check_uid: str):
+    keyboard = kb_mrk(inline_keyboard=[
+         [kb_btn(text='❔ Посмотреть в Explorer', url=f'{server_URI}/server/check/{check_uid}')]])
+    return keyboard
+
+async def main_deletedInvouceKb(invouce_uid: str):
+    keyboard = kb_mrk(inline_keyboard=[
+         [kb_btn(text='❔ Посмотреть в Explorer', url=f'{server_URI}/server/invoice/{invouce_uid}')]])
+    return keyboard
+async def main_ProceedInvouce(invouce_uid: str, user_id: int):
+    keyboard = kb_mrk(inline_keyboard=[
+         [kb_btn(text='⚡️ Списать со счета', callback_data = f'inv:{user_id}:{invouce_uid}')],
+         [kb_btn(text='❌ Отказаться', callback_data='menu')]])
     return keyboard

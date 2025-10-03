@@ -30,3 +30,16 @@ class SearchUser(BaseModel):
 class DeleteInvouce(BaseModel):
     user_id: int
     UID: str
+
+class DelCheck(BaseModel):
+    user_id_clicker: int
+    UID: str
+
+
+
+#user
+class SearchInvouceRequest(BaseModel):
+    invouce_UID: str
+
+class SearchCheckRequest(BaseModel):
+    check_UID: str

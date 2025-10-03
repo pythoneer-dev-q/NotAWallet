@@ -1,4 +1,5 @@
 from motor.motor_asyncio import AsyncIOMotorClient
+from pymongo import ReturnDocument
 from security.config import user_checks, database
 import uuid
 
@@ -32,3 +33,34 @@ async def loggUpdate(user_recipient_id: int, tx_UID: str):
         return user_recipientBalance["balance"]
     else:
         return 0
+
+
+async def loggDelete(wallet_sender_id: int, check_UID: str):
+    check_data = await lgg_dbs.find_one(
+        {'CHECK_ID': check_UID},
+        projection={'_id': False}
+    )
+
+    if not check_data:
+        print(None)
+        return None
+
+    if check_data.get('wallet_from') != wallet_sender_id or check_data.get('status') == 2:
+        print(None)
+        return None
+
+    deleted_data = await lgg_dbs.find_one_and_update(
+        {'wallet_from': wallet_sender_id, 'CHECK_ID': check_UID},
+        {'$set': {'status': 2}},
+        projection={'_id': False},
+        return_document=ReturnDocument.AFTER
+    )
+    return deleted_data
+
+async def search_check(UID: str):
+    data = await lgg_dbs.find_one({'CHECK_ID': UID}, projection={'_id': False})
+    if data is not None:
+        print(data)
+        return data
+    else:
+        return None

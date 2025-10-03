@@ -3,6 +3,7 @@ from aiogram.types import CallbackQuery, Message
 from aiogram.filters import Command, CommandStart
 from aiogram.fsm.context import FSMContext
 import security.database as main_db
+import security.block_database as bdb
 import app.keyboards as kb
 from asyncio import sleep
 from utils import getLang, sort_user_data
@@ -22,7 +23,10 @@ async def main_starterLinker(message: Message, command: CommandStart):
     args = command.args or ""
 
     if args.startswith('inv'):
-        await message.answer(f'Отловил твой счет:\nUID: {args}')
+        uid = args.replace('inv', '')
+        from_user, amount, UID, status = await bdb.main_searchInvouce(invouce_uid=uid)
+        await message.answer(f'Вы точно хотите оплатить данный счет?\nДанные:\n - От: {from_user}\n - Сумма: {amount}\n - ID: {UID}\n - Status: {status}',
+                             reply_markup=await kb.main_ProceedInvouce(user_id=message.from_user.id, invouce_uid=UID))
 
 
 @router.message(CommandStart(deep_link=False))

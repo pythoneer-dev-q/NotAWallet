@@ -5,14 +5,14 @@ import uvicorn
 import security.database as db
 import security.config as conf
 from utils.models import (
-    RegUser, SendToWallet, RegCheck, GetCheck, RegInvouce, GetInvouce, SearchUser, DeleteInvouce
+    RegUser, SendToWallet, RegCheck, GetCheck, RegInvouce, GetInvouce, SearchUser, DeleteInvouce, DelCheck, SearchCheckRequest, SearchInvouceRequest
 )
 
 
 app = FastAPI()
 
 @app.get('/')
-@app.get('/main')
+@app.get('/main_server')
 async def main_helloWorld():
     return jsresp({
         'detail': 'OK.',
@@ -52,6 +52,22 @@ async def main_CheckGetter(check_getter: GetCheck):
         return jsresp({'error': UID, 'detail': 'см. /errs'}, 503)
     else:
         return jsresp({'status': status, 'tx_UID': UID, 'after_balance': balance, 'activated_user': user_id}, 200)    
+@app.post('/delCheck')
+async def main_CheckDeleter(check_deleter: DelCheck):
+    transaction_data = await db.main_deleterCheck(from_user_id=check_deleter.user_id_clicker, inv_UID=check_deleter.UID)
+    if transaction_data in conf.errs_transactions:
+        return jsresp({'error': transaction_data, 'detail': 'см. /errs'}, 503)
+    else:
+        return jsresp({'transaction_doc': transaction_data, 'deleted_user': check_deleter.user_id_clicker}, 200)    
+
+@app.post('/searchCheck')
+async def main_check_searcher(user_clicked_data: SearchCheckRequest):
+    data = await db.main_searchCheck(check_UID=user_clicked_data.check_UID)
+    if data in conf.errs_transactions:
+        return jsresp({'error': data, 'detail': 'см. /errs'}, 503)
+    else:
+        return jsresp({'status': 'found', 'document': data}, 200)    
+
 
 @app.post('/regInvouce')
 async def main_InvouceRegister(invouce_sender: RegInvouce):
@@ -76,7 +92,13 @@ async def main_invouceDeleter(invouce_deleterData: DeleteInvouce):
         return jsresp({'error': data, 'detail': 'см. /errs'}, 503)
     else:
         return jsresp({'status': 'deleted', 'transaction_doc': data}, 200)     
-
+@app.post('/searchInvouce')
+async def main_invouce_searcher(user_clicked_data: SearchInvouceRequest):
+    data = await db.main_searchInvouce(invouce_UID=user_clicked_data.invouce_UID)
+    if data in conf.errs_transactions:
+        return jsresp({'error': data, 'detail': 'см. /errs'}, 503)
+    else:
+        return jsresp({'status': 'found', 'document': data}, 200)    
 
 
 

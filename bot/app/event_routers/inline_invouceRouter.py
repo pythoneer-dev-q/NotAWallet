@@ -65,10 +65,10 @@ async def cancel_invoice(call: types.CallbackQuery):
     uid = call.data.split(":")[2]
     status, from_user, amount  = await main_deleteInvouce(clicked_user_id=call.from_user.id, invouce_UID=uid)
     if (status is not None) and call.message:
-        await call.message.edit_text(f"❌ Счёт {uid} отменен!\nВы больше не сможете оплатить его.\nДанные:\n - <b>От кого: {from_user}</b>\n - <b>Сумма: {amount}</b>")
+        await call.message.edit_text(f"❌ Счёт {uid} отменен!\nВы больше не сможете оплатить его.\nДанные:\n - <b>От кого: {from_user}</b>\n - <b>Сумма: {amount}</b>", reply_markup=await kb.main_deletedInvouceKb(invouce_uid=uid))
     elif (status is not None) and call.inline_message_id:
         await call.bot.edit_message_text(inline_message_id=call.inline_message_id,
-                                       text=f"❌ Счёт {uid} отменен!\nВы больше не сможете оплатить его.\nДанные:\n - <b>От кого: {from_user}</b>\n - <b>Сумма: {amount}</b>")
+                                       text=f"❌ Счёт {uid} отменен!\nВы больше не сможете оплатить его.\nДанные:\n - <b>От кого: {from_user}</b>\n - <b>Сумма: {amount}</b>", reply_markup=await kb.main_deletedInvouceKb(invouce_uid=uid))
     else:
         await call.answer('Эта кнопка не для тебя..')
     await call.answer("Счёт отменён", show_alert=False)

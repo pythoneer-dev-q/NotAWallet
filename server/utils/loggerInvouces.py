@@ -53,3 +53,10 @@ async def main_deleteInvouce(invouce_UID: str):
         return True
     else:
         return None
+    
+async def search_invouce(invouce_UID: str):
+    data = await lgg_dbs.find_one({'UID': invouce_UID}, projection={'_id': False})
+    if data is not None:
+        return data
+    else:
+        return None

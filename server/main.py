@@ -2,9 +2,11 @@ import uvicorn
 import asyncio
 from app.handlers import app
 from security import database
-
+from assets.api_handler import asset_app
 # инициализация используя запрос к init() в database.py,
 # создает коллекции и индексы, если их нет, если есть -- индексирует по asc (1)
+
+app.include_router(asset_app)
 
 async def main():
     try:

@@ -126,7 +126,18 @@ async def main_handlerActivateCheck(to_user_id: int , tx_UID: str):
             return tx_UID, bill_info, to_user_id, 2
         else:
             return 'ACTIVATED', None, None, 0
-
+        
+async def main_deleterCheck(from_user_id: int, inv_UID: str):
+    sender_data = await main_searchUser(user_id=from_user_id)
+    if sender_data is not None:
+        
+        exit_info = await loggerCheck.loggDelete(wallet_sender_id=sender_data['wallet_address'], check_UID=inv_UID)
+        if exit_info is not None:
+            return exit_info
+        else:
+            return 'SRVR_ERR'
+    else:
+        return 'USER_ERR'
 
 async def main_registerInvouces(from_user_id: int, amount: float):
     sender_data = await main_searchUser(user_id=from_user_id)
@@ -167,3 +178,19 @@ async def main_deleterInvouce(user_idCreator: int, invouce_UID: str):
             return 'RESCTRICTED'
     else:
         return 'INV_NT_EXST'
+    
+
+
+async def main_searchCheck(check_UID: str):
+    data = await loggerCheck.search_check(UID=check_UID)
+    if data is not None:
+        return data
+    else:
+        return 'SRVR_ERR'
+    
+async def main_searchInvouce(invouce_UID: str):
+    data = await loggerInvouces.search_invouce(invouce_UID=invouce_UID)
+    if data is not None:
+        return data
+    else:
+        return 'SRVR_ERR'
