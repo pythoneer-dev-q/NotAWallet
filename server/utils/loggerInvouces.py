@@ -25,7 +25,7 @@ async def main_RegisterInvouce(user_id: int, amount: float):
 
 async def main_invouceHandler(payeer_user_id: int, amount: float, invouce_UID: str):
     invouce_data = await lgg_dbs.find_one({'UID': invouce_UID})
-    payeer_data = await main_db.find_one({'user_id': payeer_user_id})
+    payeer_data = await main_db.find_one({'user_id': payeer_user_id}, projection={'_id': False})
     recipient_data = await main_db.find_one({'user_id': invouce_data['user_id']})
 
     if (invouce_data) and (invouce_data["status"] == 1):

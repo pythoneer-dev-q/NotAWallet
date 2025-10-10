@@ -36,7 +36,8 @@ class DelCheck(BaseModel):
     UID: str
 
 
-
+class SearchWallet(BaseModel):
+    wallet: str
 #user
 class SearchInvouceRequest(BaseModel):
     invouce_UID: str

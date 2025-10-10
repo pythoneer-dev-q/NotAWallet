@@ -2,7 +2,7 @@ from aiogram import Router, F, types
 import asyncio
 import uuid
 import app.keyboards as kb
-from security.block_database import main_deleteCheck, main_generateCheck
+from security.block_database import main_deleteCheck, main_generateCheck, main_searchCheck, main_makeGetCheck
 
 router_inlineChecks = Router()
 
@@ -81,3 +81,24 @@ async def cancel_invoice(call: types.CallbackQuery):
     else:
         await call.answer('Эта кнопка не для тебя..')
     await call.answer("Чек отменён", show_alert=False)
+
+
+@router_inlineChecks.callback_query(F.data.startswith('chk'))
+async def main_checkProceeder(call: types.CallbackQuery):
+    check_type, user_receiver, UID = call.data.split(':')
+    from_user, amount, UID, status = await main_searchCheck(check_uid=UID)
+    status_message = await call.message.edit_text(f'Пытаюсь получить чек на {amount} от <code>{from_user}</code>...')
+    #                return from_user, user, after_balance, UID, status
+    from_user, recipient_user, after_balance, UID, status = await main_makeGetCheck(user_recipient=call.from_user.id, check_uid=UID)
+    if (status != 1) and from_user is not None:
+        await status_message.edit_text(f"""
+✅ <b>Чек {check_type}v1 №{UID} успешно получен Вами</b>
+Данные:<blockquote>
+<code>Получатель: {call.from_user.id}
+Сумма: {amount}
+UID: {UID}</code></blockquote>
+Спасибо, что используете NotAWallet""")
+        await call.bot.send_message(chat_id=from_user, text=f'✅ Ваш чек <code>{UID}</code> был получен пользователем {recipient_user}')
+
+    else:
+        await status_message.edit_text('Этот чек уже активирован.')

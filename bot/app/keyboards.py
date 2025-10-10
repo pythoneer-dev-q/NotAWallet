@@ -120,3 +120,9 @@ async def main_ProceedInvouce(invouce_uid: str, user_id: int):
          [kb_btn(text='⚡️ Списать со счета', callback_data = f'inv:{user_id}:{invouce_uid}')],
          [kb_btn(text='❌ Отказаться', callback_data='menu')]])
     return keyboard
+
+async def main_ProceedCheck(invouce_uid: str, user_id: int):
+    keyboard = kb_mrk(inline_keyboard=[
+         [kb_btn(text='⚡️ Получить', callback_data = f'chk:{user_id}:{invouce_uid}')],
+         [kb_btn(text='❌ Отказаться', callback_data='menu')]])
+    return keyboard

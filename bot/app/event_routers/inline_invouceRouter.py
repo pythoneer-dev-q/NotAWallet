@@ -2,6 +2,7 @@ from aiogram import Router, F, types
 import hashlib
 import asyncio
 import app.keyboards as kb
+from security import block_database as bdb
 from security.block_database import main_generateInvouce, main_deleteInvouce
 router_inlineInvouce = Router()
 
@@ -72,3 +73,35 @@ async def cancel_invoice(call: types.CallbackQuery):
     else:
         await call.answer('Эта кнопка не для тебя..')
     await call.answer("Счёт отменён", show_alert=False)
+
+
+# оплата счета 
+@router_inlineInvouce.callback_query(F.data.startswith('inv:'))
+async def main_invouceDecr(call: types.CallbackQuery):
+    #from_user, amount, UID, status
+    invtype, pay_user, invouce_uid = call.data.split(':')
+    from_user, amount, UID, status = await bdb.main_searchInvouce(invouce_uid=invouce_uid)
+    status_message = await call.message.edit_text(f'Попытка списать {amount} по счету <b>#{UID}</b>...')
+    from_user_id, from_user_balanceAfter, amount, invouce_uid = await bdb.main_makePayUser(user_id=pay_user, invouce_uid=invouce_uid)
+    # return from_user_id, from_user_idBalanceAfter, amount, invouce_uid
+    if from_user_id is not None:
+        user_payeer = call.from_user.id
+
+        await status_message.edit_text(f"""
+✅ <b>Счет {invtype}v1 №{invouce_uid} Успешно оплачен пользователем {user_payeer}</b>
+Данные:<blockquote>
+<code>Получатель: {from_user_id}
+Баланс получателя после: {from_user_balanceAfter}
+Сумма: {amount}
+UID: {invouce_uid}</code></blockquote>
+Спасибо, что используете NotAWallet""")
+        print(from_user_id)
+        await call.bot.send_message(chat_id=from_user_id, text=f"""✅ <b>Ваш счет был оплачен пользователем {call.from_user.id}</b>\nДанные:
+<blockquote><code>Получатель: {from_user_id}
+Баланс получателя после: {from_user_balanceAfter}
+Сумма: {amount}
+UID: {invouce_uid}</code></blockquote>
+Спасибо, что используете NotAWallet""")
+        
+
+    

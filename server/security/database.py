@@ -121,11 +121,12 @@ async def main_registerCheck(from_user_id: int, amount: float):
 async def main_handlerActivateCheck(to_user_id: int , tx_UID: str):    
     recipient_data = await main_searchUser(user_id=to_user_id)
     if recipient_data is not None:
-        bill_info = await loggerCheck.loggUpdate(user_recipient_id=to_user_id, tx_UID=tx_UID)
-        if bill_info:
-            return tx_UID, bill_info, to_user_id, 2
+        print('запросил списание и плюс средств')
+        bill_info, wallet_from = await loggerCheck.loggUpdate(user_recipient_id=to_user_id, tx_UID=tx_UID)
+        if bill_info is not None:
+            return tx_UID, bill_info, to_user_id, wallet_from ,2
         else:
-            return 'ACTIVATED', None, None, 0
+            return 'ACTIVATED', None, None, 0, None
         
 async def main_deleterCheck(from_user_id: int, inv_UID: str):
     sender_data = await main_searchUser(user_id=from_user_id)

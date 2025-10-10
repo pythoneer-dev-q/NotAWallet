@@ -5,7 +5,8 @@ import uvicorn
 import security.database as db
 import security.config as conf
 from utils.models import (
-    RegUser, SendToWallet, RegCheck, GetCheck, RegInvouce, GetInvouce, SearchUser, DeleteInvouce, DelCheck, SearchCheckRequest, SearchInvouceRequest
+    RegUser, SendToWallet, RegCheck, GetCheck, RegInvouce, GetInvouce, SearchUser, DeleteInvouce, DelCheck, SearchCheckRequest, SearchInvouceRequest,
+    SearchWallet
 )
 
 
@@ -28,6 +29,16 @@ async def main_searchuserData(user_insertData: SearchUser):
             'status': 'error',
             'detail': 'not found'
         }, status_code=404)
+    
+@app.post('/searchWallet')
+async def main_searchByWallet(user_ByWallet: SearchWallet):
+    if user_ByWallet.wallet.startswith('NOTWLT'):
+        data = await db.main_searchUserwallet(wallet_address=user_ByWallet.wallet)
+        if (data is not None) and (data is not False):
+            return jsresp(content={'data': data}, status_code=200)
+        else:
+            return jsresp(content={'detail': 'CM /errs'}, status_code=404)
+
 
 @app.post('/send')
 async def main_SenderWallet(tx_user: SendToWallet):
@@ -47,11 +58,11 @@ async def main_RegisterChecks(check_user: RegCheck):
        
 @app.post('/getCheck')
 async def main_CheckGetter(check_getter: GetCheck):
-    UID, balance, user_id, status = await db.main_handlerActivateCheck(to_user_id=check_getter.user_id_recipient, tx_UID=check_getter.tx_UID)
+    UID, balance, user_id, wallet_from, status = await db.main_handlerActivateCheck(to_user_id=check_getter.user_id_recipient, tx_UID=check_getter.tx_UID)
     if UID in conf.errs_transactions:
         return jsresp({'error': UID, 'detail': 'см. /errs'}, 503)
     else:
-        return jsresp({'status': status, 'tx_UID': UID, 'after_balance': balance, 'activated_user': user_id}, 200)    
+        return jsresp({'status': status, 'wallet_from': wallet_from, 'tx_UID': UID, 'after_balance': balance, 'activated_user': user_id}, 200)    
 @app.post('/delCheck')
 async def main_CheckDeleter(check_deleter: DelCheck):
     transaction_data = await db.main_deleterCheck(from_user_id=check_deleter.user_id_clicker, inv_UID=check_deleter.UID)

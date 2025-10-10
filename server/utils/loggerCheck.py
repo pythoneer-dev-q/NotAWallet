@@ -1,6 +1,7 @@
 from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo import ReturnDocument
 from security.config import user_checks, database
+from security import database as dbs
 import uuid
 
 client = AsyncIOMotorClient('127.0.0.1', 27017)
@@ -21,18 +22,28 @@ async def loggCheck(wallet_from: str, amount: float):
     return trsctn_doc["CHECK_ID"], trsctn_doc["wallet_from"]
 
 async def loggUpdate(user_recipient_id: int, tx_UID: str):
-    transaction_dataByID = await lgg_dbs.find_one({'CHECK_ID': tx_UID})
-    if transaction_dataByID and transaction_dataByID["status"] == 1:
-        amount_to_add = transaction_dataByID["amount"]
-        await lgg_dbs.update_one({'CHECK_ID': tx_UID}, {'$set': {'status': 2}})
+    try:
+        transaction_dataByID = await lgg_dbs.find_one({'CHECK_ID': tx_UID})
+        if transaction_dataByID and transaction_dataByID["status"] == 1:
+            amount_to_add = transaction_dataByID["amount"]
+            await lgg_dbs.update_one({'CHECK_ID': tx_UID}, {'$set': {'status': 2}})
+        
+            sender_dataByWallet = await dbs.main_searchUserwallet(wallet_address=transaction_dataByID['wallet_from'])
+            if sender_dataByWallet and sender_dataByWallet['balance'] > amount_to_add:
+                await main_db.update_one({'user_id': user_recipient_id}, {'$inc': {'balance': amount_to_add}})
+                await main_db.update_one({'user_id': sender_dataByWallet['user_id']}, {'$inc': {'balance': -amount_to_add}})
+            
+                user_recipientBalance = await main_db.find_one({'user_id': user_recipient_id})
+                user_recipientBalance["_id"] = str(user_recipientBalance['_id'])
+                return user_recipientBalance["balance"], transaction_dataByID['wallet_from']
+            else:
+                return None, None
+        else:
+            return None, None
+    except Exception as e:
+        print(f"Error occurred: {e}")
+        return None, None
 
-        adding_userRecipient = await main_db.update_one({'user_id': user_recipient_id}, {'$inc': {'balance': amount_to_add}})
-        user_recipientBalance =await  main_db.find_one({'user_id': user_recipient_id})
-        user_recipientBalance["_id"] = str(user_recipientBalance['_id'])
-
-        return user_recipientBalance["balance"]
-    else:
-        return 0
 
 
 async def loggDelete(wallet_sender_id: int, check_UID: str):

@@ -27,7 +27,13 @@ async def main_starterLinker(message: Message, command: CommandStart):
         from_user, amount, UID, status = await bdb.main_searchInvouce(invouce_uid=uid)
         await message.answer(f'Вы точно хотите оплатить данный счет?\nДанные:\n - От: {from_user}\n - Сумма: {amount}\n - ID: {UID}\n - Status: {status}',
                              reply_markup=await kb.main_ProceedInvouce(user_id=message.from_user.id, invouce_uid=UID))
-
+    elif args.startswith('chk'):
+        uid = args.replace('inv', '')
+        from_user, amount, UID, status = await bdb.main_searchCheck(check_uid=uid)
+        await message.answer(f'Вы точно хотите получить данный чек?\nДанные:\n - От: {from_user}\n - Сумма: {amount}\n - ID: {UID}\n - Status: {status}',
+                             reply_markup=await kb.main_ProceedCheck(user_id=message.from_user.id, invouce_uid=UID))
+    else:
+        await message.answer('Неверный идентификатор или ссылка.')
 
 @router.message(CommandStart(deep_link=False))
 async def main_startRegister(message: Message):
