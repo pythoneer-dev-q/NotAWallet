@@ -46,18 +46,18 @@ async def loggUpdate(user_recipient_id: int, tx_UID: str):
 
 
 
-async def loggDelete(wallet_sender_id: int, check_UID: str):
+async def loggDelete(wallet_sender_id: int, check_UID: str, user_id: int):
     check_data = await lgg_dbs.find_one(
         {'CHECK_ID': check_UID},
         projection={'_id': False}
     )
 
     if not check_data:
-        print(None)
+
         return None
 
     if check_data.get('wallet_from') != wallet_sender_id or check_data.get('status') == 2:
-        print(None)
+
         return None
 
     deleted_data = await lgg_dbs.find_one_and_update(
@@ -66,6 +66,7 @@ async def loggDelete(wallet_sender_id: int, check_UID: str):
         projection={'_id': False},
         return_document=ReturnDocument.AFTER
     )
+    back_money = await main_db.find_one_and_update({'user_id': user_id}, {'$inc': {'balance': check_data['amount']}})
     return deleted_data
 
 async def search_check(UID: str):

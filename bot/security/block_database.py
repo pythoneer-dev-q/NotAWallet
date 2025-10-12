@@ -10,32 +10,26 @@ async def init_temp_key():
 
 async def main_GetWalletUser(user_id: int):
     async with aiohttp.ClientSession() as session:
-        async with session.post(f'{database_config.API_URI}/reg', json = {
-        'user_id': f'{user_id}'
-    }) as response:
+        async with session.post(f'{database_config.API_URI}/reg', json={
+            'user_id': f'{user_id}'
+        }) as response:
             data = await response.json()
-            if data:
-                if data.get('wallet_address', None):
-                    return data
-                else:
-                    return None
+            if isinstance(data, dict) and 'wallet_address' in data:
+                return data
             else:
                 return None
-            
+
 async def main_searchUser(user_id: int):
     async with aiohttp.ClientSession() as session:
         async with session.post(f'{database_config.API_URI}/search', json={
             'user_id': f'{user_id}'
         }) as response:
             data = await response.json()
-            if data:
-                if data.get('wallet_address', None):
-                    return data
-                else:
-                    return None
+            if isinstance(data, dict) and 'wallet_address' in data:
+                return data
             else:
                 return None
-            
+
 async def main_generateInvouce(from_user_id: int, amount: int):
     async with aiohttp.ClientSession() as session:
         async with session.post(f'{database_config.API_URI}/regInvouce', json={
@@ -43,13 +37,10 @@ async def main_generateInvouce(from_user_id: int, amount: int):
             'amount': amount
         }) as response:
             data = await response.json()
-            if data is not None:
-                if data.get('status', '').lower() == 'generated':
-                    uid = data.get('invouce_UID', '')
-                    from_user = data.get('user_id_sender', '')
-                    return uid, from_user
-                else:
-                    return None, None
+            if isinstance(data, dict) and 'status' in data and data['status'].lower() == 'generated':
+                uid = data.get('invouce_UID', '')
+                from_user = data.get('user_id_sender', '')
+                return uid, from_user
             else:
                 return None, None
 
@@ -60,18 +51,13 @@ async def main_deleteInvouce(clicked_user_id: int, invouce_UID: str):
             'UID': invouce_UID
         }) as response:
             data = await response.json()
-            if data is not None:
-                if data.get('status', '').lower() == 'deleted':
+            if isinstance(data, dict) and 'status' in data and data['status'].lower() == 'deleted':
+                if 'transaction_doc' in data:
                     amount = data['transaction_doc']['amount']
                     from_user = data['transaction_doc']['user_id']
                     status = 'finished' if data['transaction_doc']['status'] == 2 else 'not_finished'
                     return status, from_user, amount
-                else:
-                    return None, None, None
-            else:
-                return None, None, None
-
-
+            return None, None, None
 
 async def main_generateCheck(from_user_id: int, amount: int):
     async with aiohttp.ClientSession() as session:
@@ -80,16 +66,13 @@ async def main_generateCheck(from_user_id: int, amount: int):
             'amount': amount
         }) as response:
             data = await response.json()
-            if data is not None:
-                if data.get('status', '').lower() == 'generated':
-                    tx_uid = data['tx_UID']
-                    from_user_wallet = data['wallet_sender']
-                    return tx_uid, from_user_wallet, amount
-                else:
-                    return None, None, None
+            if isinstance(data, dict) and 'status' in data and data['status'].lower() == 'generated':
+                tx_uid = data['tx_UID']
+                from_user_wallet = data['wallet_sender']
+                return tx_uid, from_user_wallet, amount
             else:
                 return None, None, None
-            
+
 async def main_deleteCheck(clicked_user_id: int, invouce_UID: str):
     async with aiohttp.ClientSession() as session:
         async with session.post(f'{database_config.API_URI}/delCheck', json={
@@ -97,24 +80,21 @@ async def main_deleteCheck(clicked_user_id: int, invouce_UID: str):
             'UID': invouce_UID
         }) as response:
             data = await response.json()
-            if data is not None:
-                if data.get('deleted_user', '') is not None:
+            if isinstance(data, dict) and 'deleted_user' in data:
+                if 'transaction_doc' in data:
                     amount = data['transaction_doc']['amount']
                     wallet_from = data['transaction_doc']['wallet_from']
                     check_uid = data['transaction_doc']['CHECK_ID']
                     return amount, wallet_from, check_uid, clicked_user_id
-                else:
-                    return None, None, None, None
-            else:
-                return None, None, None, None
-            
+            return None, None, None, None
+
 async def main_searchInvouce(invouce_uid: str):
     async with aiohttp.ClientSession() as session:
         async with session.post(f'{database_config.API_URI}/searchInvouce', json={
             'invouce_UID': invouce_uid
         }) as response:
             data = await response.json()
-            if data.get('status', '') is not None:
+            if isinstance(data, dict) and 'status' in data and 'document' in data:
                 from_user = data['document']['user_id']
                 amount = data['document']['amount']
                 UID = data['document']['UID']
@@ -122,14 +102,14 @@ async def main_searchInvouce(invouce_uid: str):
                 return from_user, amount, UID, status
             else:
                 return None, None, None, None
+
 async def main_searchCheck(check_uid: str):
     async with aiohttp.ClientSession() as session:
         async with session.post(f'{database_config.API_URI}/searchCheck', json={
             'check_UID': check_uid.replace('chk', '')
         }) as response:
             data = await response.json()
-            if data.get('status', '') is not None:
-                print(data)
+            if isinstance(data, dict) and 'status' in data and 'document' in data:
                 from_user = data['document']['wallet_from']
                 amount = data['document']['amount']
                 UID = data['document']['CHECK_ID']
@@ -137,20 +117,15 @@ async def main_searchCheck(check_uid: str):
                 return from_user, amount, UID, status
             else:
                 return None, None, None, None
-            
+
 async def main_makeGetCheck(user_recipient: int, check_uid: str):
-    """{
-  "user_id_recipient": 0,
-  "tx_UID": "string"
-}
-    """
     async with aiohttp.ClientSession() as session:
         async with session.post(f'{database_config.API_URI}/getCheck', json={
-  "user_id_recipient": user_recipient,
-  "tx_UID": check_uid
-}) as response:
+            "user_id_recipient": user_recipient,
+            "tx_UID": check_uid
+        }) as response:
             data = await response.json()
-            if (data.get('status', '') is not None) and (data.get('wallet_from') is not None):
+            if isinstance(data, dict) and 'status' in data and 'wallet_from' in data:
                 from_user, after_sender_balance = await main_searchByWallet(wallet=data['wallet_from'])
                 user = data['activated_user']
                 after_balance = data['after_balance']
@@ -158,8 +133,7 @@ async def main_makeGetCheck(user_recipient: int, check_uid: str):
                 return from_user, user, after_balance, check_uid, status
             else:
                 return None, None, None, None, None
-            
-            
+
 async def main_makePayUser(user_id: int, invouce_uid: str):
     async with aiohttp.ClientSession() as session:
         async with session.post(f'{database_config.API_URI}/getInvouce', json={
@@ -167,21 +141,21 @@ async def main_makePayUser(user_id: int, invouce_uid: str):
             'user_id_sender': user_id
         }) as response:
             data = await response.json()
-            if (data.get('status', '') is not None) and (data.get('status', '') == 'Paid'):
-                from_user = data['transaction_doc']['wallet_to']
-                from_user_id, from_user_idBalanceAfter = await main_searchByWallet(wallet=from_user) 
-                amount = data['transaction_doc']['amount']
-                return from_user_id, from_user_idBalanceAfter, amount, invouce_uid
-            else:
-                return None, None, None, None
-            
+            if isinstance(data, dict) and 'status' in data and data['status'] == 'Paid':
+                if 'transaction_doc' in data:
+                    from_user = data['transaction_doc']['wallet_to']
+                    from_user_id, from_user_idBalanceAfter = await main_searchByWallet(wallet=from_user)
+                    amount = data['transaction_doc']['amount']
+                    return from_user_id, from_user_idBalanceAfter, amount, invouce_uid
+            return None, None, None, None
+
 async def main_searchByWallet(wallet: str):
     async with aiohttp.ClientSession() as session:
         async with session.post(f'{database_config.API_URI}/searchWallet', json={
             'wallet': wallet
         }) as response:
             data = await response.json()
-            if (data.get('data', '') is not None):
+            if isinstance(data, dict) and 'data' in data:
                 wallet_user = data['data']['user_id']
                 user_balance = data['data']['balance']
                 return wallet_user, user_balance

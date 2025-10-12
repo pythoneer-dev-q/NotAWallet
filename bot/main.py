@@ -6,12 +6,15 @@ import asyncio
 from security.block_database import init_temp_key
 from app.event_routers.inline_invouceRouter import router_inlineInvouce
 from app.event_routers.inline_sendRouter import router_inlineChecks
+from app.event_routers.send_buttonRouter import sendBtnRouter
+from app.event_routers.invouce_buttonRouter import invBtnRoter
+from app.adminRouter import adminrouter
 
 bot = Bot(token=conf.BOT_TOKEN, default=prop(parse_mode='HTML', link_preview_prefer_large_media=True))
 dp = Dispatcher()
 
 async def main():
-    dp.include_routers(router, router_inlineInvouce, router_inlineChecks)
+    dp.include_routers(router, router_inlineInvouce, router_inlineChecks, sendBtnRouter, invBtnRoter, adminrouter)
     await init_temp_key()
     await dp.start_polling(bot)
 

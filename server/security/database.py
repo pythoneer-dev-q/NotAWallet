@@ -55,11 +55,13 @@ async def main_searchUserwallet(wallet_address: str):
 async def main_registerUser(user_id: int, meta: str = None):
     register_db = mainClient[database]
     UID = f'NOTWLT{uuid4()}'
+    api_key = f'NAPI{uuid4()}'
     main_doc = {
         'wallet_address': f'{UID}',
         'user_id': int(user_id),
         'balance': 0.0,
-        'meta': ''
+        'meta': '',
+        'api_key': api_key
     }
     user_found = main_searchUser(user_id)
     if await user_found is None:
@@ -132,7 +134,7 @@ async def main_deleterCheck(from_user_id: int, inv_UID: str):
     sender_data = await main_searchUser(user_id=from_user_id)
     if sender_data is not None:
         
-        exit_info = await loggerCheck.loggDelete(wallet_sender_id=sender_data['wallet_address'], check_UID=inv_UID)
+        exit_info = await loggerCheck.loggDelete(wallet_sender_id=sender_data['wallet_address'], check_UID=inv_UID, user_id=from_user_id)
         if exit_info is not None:
             return exit_info
         else:
@@ -180,7 +182,8 @@ async def main_deleterInvouce(user_idCreator: int, invouce_UID: str):
     else:
         return 'INV_NT_EXST'
     
-
+async def main_sendFunds(wallet_from: str, wallet_to: str):
+    pass
 
 async def main_searchCheck(check_UID: str):
     data = await loggerCheck.search_check(UID=check_UID)

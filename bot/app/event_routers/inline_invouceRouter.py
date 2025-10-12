@@ -3,7 +3,7 @@ import hashlib
 import asyncio
 import app.keyboards as kb
 from security import block_database as bdb
-from security.block_database import main_generateInvouce, main_deleteInvouce
+from security.block_database import main_generateInvouce, main_deleteInvouce, main_searchUser
 router_inlineInvouce = Router()
 
 
@@ -11,21 +11,36 @@ router_inlineInvouce = Router()
 async def main_InlineInvouce(query: types.InlineQuery):
     content_text = query.query.replace("inv ", "").strip() or "0"
     inline_id = hashlib.md5(content_text.encode()).hexdigest()
-    try:
-        content_text = int(content_text)
-        result = types.InlineQueryResultArticle(
-            id=inline_id,
-            title=f"💰 Создать счёт на {content_text} монет",
-            input_message_content=types.InputTextMessageContent(
-                message_text=f"Нажмите на кнопку, чтобы создать счет на {content_text} монет..."
-            ),
-            reply_markup=await kb.proceed_invouce(amount=content_text))
+    user_id = query.from_user.id
+    user_data = await main_searchUser(user_id)
 
-        await query.answer(results=[result], cache_time=1)
+
+    try:
+        content_text = float(content_text)
+        if content_text and user_data is not None:
+            result = types.InlineQueryResultArticle(
+                id=inline_id,
+                title=f"💰 Создать счёт на {content_text} монет",
+                input_message_content=types.InputTextMessageContent(
+                    message_text=f"Нажмите на кнопку, чтобы создать счет на {content_text} монет..."
+                ),
+                reply_markup=await kb.proceed_invouce(amount=content_text, user_id=user_id))
+
+            await query.answer(results=[result], cache_time=1)
+        else:
+            result = types.InlineQueryResultArticle(
+                id=inline_id,
+                title=f"❌ Не получится создать счет. Вы не зарегистрированы или сумма -- не число.",
+                input_message_content=types.InputTextMessageContent(
+                    message_text=f"❌ Вы не можете создать счет. <b>Попробуйте пройти регистрацию в боте</b>, написав @NTWLT_BOT /start"
+                ))
+
+            await query.answer(results=[result], cache_time=1)
+            
     except Exception as e:
         result = types.InlineQueryResultArticle(
             id=inline_id,
-            title=f"Сумма должа быть числом!",
+            title=f"❌ Сумма должа быть числом!",
             input_message_content=types.InputTextMessageContent(
                 message_text=f"❌ Нельзя создать такой счет."
             ))
@@ -102,6 +117,8 @@ UID: {invouce_uid}</code></blockquote>
 Сумма: {amount}
 UID: {invouce_uid}</code></blockquote>
 Спасибо, что используете NotAWallet""")
+    else:
+        await call.message.edit_text('Возможно, у вас недостаточно средств для оплаты этого счета.')
         
 
     
