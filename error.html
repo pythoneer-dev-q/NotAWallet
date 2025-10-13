@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ошибка 404 - NotAWallet</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-light: #f8fafc;
+            --bg-dark: #0f172a;
+            --text-light: #1e293b;
+            --text-dark: #f1f5f9;
+            --accent-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --error-gradient: linear-gradient(135deg, #ef4444 0%, #f97316 100%);
+            --card-bg-light: rgba(255, 255, 255, 0.9);
+            --card-bg-dark: rgba(30, 41, 59, 0.9);
+            --border-light: rgba(226, 232, 240, 0.8);
+            --border-dark: rgba(51, 65, 85, 0.8);
+            --shadow-light: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-dark: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-light);
+            color: var(--text-light);
+            line-height: 1.6;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        body.dark {
+            background: var(--bg-dark);
+            color: var(--text-dark);
+        }
+
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-light);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        body.dark .nav {
+            background: rgba(15, 23, 42, 0.95);
+            border-bottom-color: var(--border-dark);
+        }
+
+        .nav-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60px;
+        }
+
+        .logo {
+            font-weight: 700;
+            font-size: 1.2rem;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .theme-toggle {
+            background: var(--accent-gradient);
+            border: none;
+            border-radius: 50px;
+            padding: 8px 16px;
+            color: white;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .theme-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 100px 20px 40px;
+        }
+
+        .error-container {
+            max-width: 600px;
+            text-align: center;
+        }
+
+        .error-icon {
+            font-size: 8rem;
+            margin-bottom: 30px;
+            background: var(--error-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .error-code {
+            font-size: 4rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            background: var(--error-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .error-message {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--text-light);
+        }
+
+        body.dark .error-message {
+            color: var(--text-dark);
+        }
+
+        .error-description {
+            font-size: 1.1rem;
+            margin-bottom: 40px;
+            opacity: 0.8;
+            color: var(--text-light);
+        }
+
+        body.dark .error-description {
+            color: var(--text-dark);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 500;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            margin: 0 10px;
+        }
+
+        .btn-primary {
+            background: var(--accent-gradient);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid var(--accent-gradient);
+            color: var(--text-light);
+        }
+
+        body.dark .btn-secondary {
+            color: var(--text-dark);
+        }
+
+        .btn-secondary:hover {
+            background: var(--accent-gradient);
+            color: white;
+        }
+
+        .suggestions {
+            margin-top: 50px;
+            padding: 30px;
+            background: var(--card-bg-light);
+            border-radius: 20px;
+            box-shadow: var(--shadow-light);
+            border: 1px solid var(--border-light);
+        }
+
+        body.dark .suggestions {
+            background: var(--card-bg-dark);
+            box-shadow: var(--shadow-dark);
+            border-color: var(--border-dark);
+        }
+
+        .suggestions h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .suggestions ul {
+            list-style: none;
+            padding: 0;
+            text-align: left;
+        }
+
+        .suggestions li {
+            margin: 10px 0;
+            padding-left: 25px;
+            position: relative;
+            font-size: 1rem;
+        }
+
+        .suggestions li::before {
+            content: "💡";
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+
+        footer {
+            background: var(--card-bg-light);
+            border-top: 1px solid var(--border-light);
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        body.dark footer {
+            background: var(--card-bg-dark);
+            border-top-color: var(--border-dark);
+        }
+
+        footer p {
+            color: var(--text-light);
+            opacity: 0.7;
+        }
+
+        body.dark footer p {
+            color: var(--text-dark);
+        }
+
+        @media (max-width: 768px) {
+            .error-icon {
+                font-size: 6rem;
+            }
+
+            .error-code {
+                font-size: 3rem;
+            }
+
+            .error-message {
+                font-size: 1.3rem;
+            }
+
+            .btn {
+                margin: 5px;
+                padding: 10px 20px;
+            }
+
+            .suggestions {
+                padding: 20px;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-light);
+        }
+
+        body.dark ::-webkit-scrollbar-track {
+            background: var(--bg-dark);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent-gradient);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #5a67d8 0%, #667eea 100%);
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="nav">
+        <div class="nav-content">
+            <div class="logo">NotAWallet</div>
+            <button class="theme-toggle" onclick="toggleTheme()">
+                <i class="fas fa-moon"></i>
+                <span>Тема</span>
+            </button>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <div class="error-container">
+            <div class="error-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+
+            <div class="error-code">404</div>
+
+            <h1 class="error-message">Страница не найдена</h1>
+
+            <p class="error-description">
+                К сожалению, запрашиваемая страница не существует или была перемещена.
+            </p>
+
+            <div class="buttons">
+                <a href="index.html" class="btn btn-primary">
+                    <i class="fas fa-home"></i>
+                    На главную
+                </a>
+                <button class="btn btn-secondary" onclick="goBack()">
+                    <i class="fas fa-arrow-left"></i>
+                    Назад
+                </button>
+            </div>
+
+            <div class="suggestions">
+                <h3><i class="fas fa-lightbulb"></i> Что можно сделать:</h3>
+                <ul>
+                    <li>Проверьте правильность URL-адреса</li>
+                    <li>Вернитесь на главную страницу</li>
+                    <li>Используйте навигационное меню</li>
+                    <li>Попробуйте обновить страницу</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 NotAWallet. Все права защищены. Демонстрационный макет криптовалютного кошелька.</p>
+    </footer>
+
+    <script>
+        function toggleTheme() {
+            document.body.classList.toggle("dark");
+            const themeIcon = document.querySelector('.theme-toggle i');
+            const themeText = document.querySelector('.theme-toggle span');
+
+            if (document.body.classList.contains('dark')) {
+                themeIcon.className = 'fas fa-sun';
+                themeText.textContent = 'Светлая';
+            } else {
+                themeIcon.className = 'fas fa-moon';
+                themeText.textContent = 'Темная';
+            }
+        }
+
+        function goBack() {
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                window.location.href = 'index.html';
+            }
+        }
+
+        window.addEventListener('scroll', function () {
+            const nav = document.querySelector('.nav');
+            if (window.scrollY > 100) {
+                nav.style.background = document.body.classList.contains('dark')
+                    ? 'rgba(15, 23, 42, 0.98)'
+                    : 'rgba(255, 255, 255, 0.98)';
+            } else {
+                nav.style.background = document.body.classList.contains('dark')
+                    ? 'rgba(15, 23, 42, 0.95)'
+                    : 'rgba(255, 255, 255, 0.95)';
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const errorIcon = document.querySelector('.error-icon');
+            errorIcon.style.opacity = '0';
+            errorIcon.style.transform = 'scale(0.5)';
+
+            setTimeout(() => {
+                errorIcon.style.transition = 'all 0.5s ease';
+                errorIcon.style.opacity = '1';
+                errorIcon.style.transform = 'scale(1)';
+            }, 200);
+
+            const errorCode = document.querySelector('.error-code');
+            errorCode.style.opacity = '0';
+            errorCode.style.transform = 'translateY(20px)';
+
+            setTimeout(() => {
+                errorCode.style.transition = 'all 0.5s ease';
+                errorCode.style.opacity = '1';
+                errorCode.style.transform = 'translateY(0)';
+            }, 400);
+
+            const errorMessage = document.querySelector('.error-message');
+            errorMessage.style.opacity = '0';
+            errorMessage.style.transform = 'translateY(20px)';
+
+            setTimeout(() => {
+                errorMessage.style.transition = 'all 0.5s ease';
+                errorMessage.style.opacity = '1';
+                errorMessage.style.transform = 'translateY(0)';
+            }, 600);
+        });
+    </script>
+</body>
+
+</html>
