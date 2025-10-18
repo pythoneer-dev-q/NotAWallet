@@ -1,1 +1,1 @@
-server_URI = 'https://notawallet.sbs'
+server_URI = 'https://notawallet.sbs/'

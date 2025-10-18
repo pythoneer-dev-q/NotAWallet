@@ -12,7 +12,7 @@ from utils.models import (
 
 app = FastAPI()
 
-@app.get('/')
+
 @app.get('/main_server')
 async def main_helloWorld():
     return jsresp({
