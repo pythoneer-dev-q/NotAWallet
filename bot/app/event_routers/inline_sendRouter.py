@@ -3,7 +3,7 @@ import asyncio
 import uuid
 import app.keyboards as kb
 from security.block_database import main_deleteCheck, main_generateCheck, main_searchCheck, main_makeGetCheck, main_searchUser
-
+from config.main_cofig import server_URI
 router_inlineChecks = Router()
 
 
@@ -55,6 +55,7 @@ async def start_check(call: types.CallbackQuery):
     inl_type, amount, sender_id = call.data.split(":")
     sender_id = int(sender_id)
     user_id = call.from_user.id
+    user_info = await main_searchUser(sender_id)
     tx_UID, from_user, amount = await main_generateCheck(from_user_id=user_id, amount=amount)
 
 
@@ -66,7 +67,7 @@ async def start_check(call: types.CallbackQuery):
         await call.message.edit_text(f"⏳ Создаём Чек на {amount} монет...")
         await asyncio.sleep(1)
         await call.message.edit_text(
-            text=f"✅ Чек на {amount} монет готов!\n<b>Данные</b>:\n - От: <b>{from_user}</b>\n - UID: <code>{tx_UID}</code>\nНажмите кнопку для получения.",
+            text=f"✅ Чек на {amount} монет готов!\n<b>Данные</b>:\n - От: <b><a href='{server_URI}?call=server/{user_info['wallet_address']}>{from_user}(кто это?)</a></b>\n - UID: <code>{tx_UID}</code>\nНажмите кнопку для получения.",
             reply_markup=await kb.main_getCheck(check_amount=amount, check_uid=tx_UID)
         )
     elif (call.inline_message_id) and (sender_id == call.from_user.id):
@@ -82,7 +83,7 @@ async def start_check(call: types.CallbackQuery):
                                          text=f"⏳ Создаём Чек на {amount} монет...")
         await asyncio.sleep(2)
         await call.bot.edit_message_text(inline_message_id=inline_id,
-                                         text=f"✅ Чек на {amount} монет готов!\n<b>Данные</b>:\n - От: <b>{from_user}</b>\n - UID: <code>{tx_UID}</code>\nНажмите кнопку для получения.",
+                                         text=f"✅ Чек на {amount} монет готов!\n<b>Данные</b>:\n - От: <b><a href='{server_URI}?call=server/{user_info['wallet_address']}>{from_user}(кто это?)</a></b>\n - UID: <code>{tx_UID}</code>\nНажмите кнопку для получения.",
                                          reply_markup=await kb.main_getCheck(check_amount=amount, check_uid=tx_UID))
     else:
         await call.answer('Эта кнопка не для тебя.', show_alert=True)

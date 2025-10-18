@@ -4,6 +4,8 @@ import asyncio
 import app.keyboards as kb
 from security import block_database as bdb
 from security.block_database import main_generateInvouce, main_deleteInvouce, main_searchUser
+import config.main_cofig as URI
+
 router_inlineInvouce = Router()
 
 
@@ -101,17 +103,16 @@ async def main_invouceDecr(call: types.CallbackQuery):
     # return from_user_id, from_user_idBalanceAfter, amount, invouce_uid
     if from_user_id is not None:
         user_payeer = call.from_user.id
-
+        user_payInfo = await bdb.main_searchUser(user_id=user_payeer)
         await status_message.edit_text(f"""
-✅ <b>Счет {invtype}v1 №{invouce_uid} Успешно оплачен пользователем {user_payeer}</b>
+✅ <b>Счет {invtype}v1 №{invouce_uid} Успешно оплачен пользователем <a href='{URI.server_URI}?call=server/{user_payInfo['wallet_address']}'>{call.from_user.id} (кто это?)</a></b>
 Данные:<blockquote>
 <code>Получатель: {from_user_id}
 Баланс получателя после: {from_user_balanceAfter}
 Сумма: {amount}
 UID: {invouce_uid}</code></blockquote>
 Спасибо, что используете NotAWallet""")
-        print(from_user_id)
-        await call.bot.send_message(chat_id=from_user_id, text=f"""✅ <b>Ваш счет был оплачен пользователем {call.from_user.id}</b>\nДанные:
+        await call.bot.send_message(chat_id=from_user_id, text=f"""✅ <b>Ваш счет был оплачен пользователем <a href='{URI.server_URI}?call=server/{user_payInfo['wallet_address']}'>{call.from_user.id} (кто это?)</a></b>\nДанные:
 <blockquote><code>Получатель: {from_user_id}
 Баланс получателя после: {from_user_balanceAfter}
 Сумма: {amount}
