@@ -358,7 +358,158 @@ async def main_checkMan(call: Optional[str] = Query(None)):
 </body>
 </html>
 """, status_code=200)
-    
+
+@asset_app.get("/server/{wallet}")
+async def wallet_stats(wallet: str):
+    #transac_check, transac_inv, transac_sumSended, transac_sumPlus, transac_invPlus
+    data_wlt = await db.main_searchUserwallet(wallet_address=wallet)
+    if data_wlt is not None:
+        trn_data = await db.main_searchCountTransactions(user_wallet=wallet)
+        transac_check, transac_inv, transac_sumSended, transac_sumPlus, transac_invPlus = trn_data
+        data = {
+        "wallet": wallet,
+        "balance": data_wlt['balance'],
+        "transactions": transac_check + transac_inv,
+        "volume": abs(transac_invPlus + transac_sumPlus + transac_sumSended),
+        "created_at": "2025",
+        "last_active": "2025",
+        "online": True if data_wlt['balance'] > 0 else False  # или False
+    }
+
+    html = f"""<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Статистика кошелька | NotAWallet</title>
+  <style>
+    body {{
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      background: #0e0e10;
+      color: #eaeaea;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }}
+    .card {{
+      background: #1a1a1d;
+      border-radius: 20px;
+      padding: 30px 40px;
+      width: 380px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+      text-align: center;
+      animation: fadeIn 0.6s ease;
+    }}
+    @keyframes fadeIn {{
+      from {{ opacity: 0; transform: translateY(10px); }}
+      to {{ opacity: 1; transform: translateY(0); }}
+    }}
+    .card h2 {{
+      margin-bottom: 10px;
+      font-size: 1.6rem;
+      color: #ffffff;
+    }}
+    .status {{
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-bottom: 20px;
+    }}
+    .status span {{
+      font-size: 0.9rem;
+      color: #9b9b9b;
+    }}
+    .dot {{
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: {"#00ff5f" if data['online'] else "#888"};
+      box-shadow: {"0 0 6px #00ff5f" if data['online'] else "none"};
+    }}
+    .wallet {{
+      font-family: monospace;
+      background: #2c2c30;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      margin-bottom: 15px;
+      display: inline-block;
+      color: #bcbcbc;
+    }}
+    .stat {{
+      display: flex;
+      justify-content: space-between;
+      margin: 10px 0;
+      font-size: 1.05rem;
+    }}
+    .stat span:first-child {{
+      color: #9c9c9c;
+    }}
+    .back {{
+      display: inline-block;
+      margin-top: 25px;
+      color: #fff;
+      text-decoration: none;
+      background: #00ff5f22;
+      border: 1px solid #00ff5f44;
+      padding: 8px 15px;
+      border-radius: 10px;
+      transition: 0.3s;
+    }}
+    .back:hover {{
+      background: #00ff5f33;
+      border-color: #00ff5f77;
+    }}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Статистика кошелька</h2>
+
+    <div class="status">
+      <div class="dot"></div>
+      <span>{'В сети' if data['online'] else 'Не в сети'}</span>
+    </div>
+
+    <div class="wallet">{data['wallet']}</div>
+
+    <div class="stat">
+      <span>Баланс:</span>
+      <span>{data['balance']} монет</span>
+    </div>
+
+    <div class="stat">
+      <span>Транзакций:</span>
+      <span>{data['transactions']}</span>
+    </div>
+
+    <div class="stat">
+      <span>Объем операций:</span>
+      <span>{data['volume']} монет</span>
+    </div>
+
+    <div class="stat">
+      <span>Дата регистрации:</span>
+      <span>{data['created_at']}</span>
+    </div>
+
+    <div class="stat">
+      <span>Последняя активность:</span>
+      <span>{data['last_active']}</span>
+    </div>
+
+    <a href="/main" class="back">← На главную</a>
+  </div>
+</body>
+</html>
+"""
+    return HTMLResponse(content=html, status_code=200)
+
+
 @asset_app.get('/errs')
 async def main_responseWriter():
     return HTMLResponse(
@@ -696,6 +847,36 @@ async def main_Mainget():
             padding: 40px 20px;
         }
 
+        .search-container {
+            max-width: 600px;
+            margin: 20px auto;
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-container input {
+            flex: 1;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid var(--border-light);
+            font-size: 1rem;
+        }
+
+        .search-container button {
+            background: var(--accent-gradient);
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .search-container button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
         .card {
             background: var(--card-bg-light);
             border-radius: 20px;
@@ -953,6 +1134,10 @@ async def main_Mainget():
     </header>
 
     <div class="container">
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Введите адрес кошелька (NTWLT...), чек (CHECK...) или счет (INVC...)">
+            <button onclick="performSearch()">Поиск</button>
+        </div>
 
         <div class="card">
             <h2><i class="fas fa-wallet"></i> Функции кошелька</h2>
@@ -1041,6 +1226,19 @@ async def main_Mainget():
             } else {
                 themeIcon.className = 'fas fa-moon';
                 themeText.textContent = 'Темная';
+            }
+        }
+
+        function performSearch() {
+            const query = document.getElementById('searchInput').value.trim();
+            if (query.startsWith('NOTWLT')) {
+                window.location.href = `/server/${query}`;
+            } else if (query.startsWith('CHECK')) {
+                window.location.href = `/server/check/${query}`;
+            } else if (query.startsWith('INVC')) {
+                window.location.href = `/server/invoice/${query}`;
+            } else {
+                alert('Неверный формат. Кошелек начинается с NTWLT, счет с INVC, чек с CHECK.');
             }
         }
 
@@ -2240,4 +2438,3 @@ async def render_invoice_page(uid: str):
     </html>
     """
     return HTMLResponse(content=html)
-

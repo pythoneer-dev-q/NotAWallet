@@ -50,6 +50,46 @@ async def main_searchUserwallet(wallet_address: str):
             return None
     else:
         return False
+async def main_searchCountTransactions(user_wallet: str):
+    registered_db = mainClient[database]
+    checks_db = mainClient[user_checks]
+    inv_db = mainClient[user_invouces]
+
+    transac_check = 0
+    transac_inv = 0
+    transac_sumSended = 0
+    transac_sumPlus = 0
+    transac_invPlus = 0
+
+    user_data = await main_searchUserwallet(wallet_address=user_wallet)
+    if not user_data:
+        return None, None, None, None, None
+
+    transac_check = await checks_db.count_documents({'wallet_from': user_wallet})
+    transac_inv = await inv_db.count_documents({'user_id': user_data['user_id']})
+
+    pipeline_sended = [
+        {'$match': {'status': 2, 'wallet_from': user_wallet}},
+        {'$group': {'_id': None, 'totalAmount': {'$sum': '$amount'}}}
+    ]
+    sended_result = await checks_db.aggregate(pipeline_sended).to_list(length=1)
+    transac_sumSended = sended_result[0]['totalAmount'] if sended_result else 0
+
+    pipeline_plus = [
+        {'$match': {'status': 2, 'wallet_to': user_wallet}},
+        {'$group': {'_id': None, 'totalAmount': {'$sum': '$amount'}}}
+    ]
+    plus_result = await checks_db.aggregate(pipeline_plus).to_list(length=1)
+    transac_sumPlus = plus_result[0]['totalAmount'] if plus_result else 0
+
+    pipeline_inv_plus = [
+        {'$match': {'status': 2, 'user_id': user_data['user_id']}},
+        {'$group': {'_id': None, 'totalAmount': {'$sum': '$amount'}}}
+    ]
+    inv_plus_result = await inv_db.aggregate(pipeline_inv_plus).to_list(length=1)
+    transac_invPlus = inv_plus_result[0]['totalAmount'] if inv_plus_result else 0
+
+    return transac_check, transac_inv, transac_sumSended, transac_sumPlus, transac_invPlus
 
 # регистрация пользователя (если не зарегистрирован)
 async def main_registerUser(user_id: int, meta: str = None):
